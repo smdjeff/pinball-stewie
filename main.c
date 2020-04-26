@@ -2,7 +2,11 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
- 
+
+// http://abyz.me.uk/rpi/pigpio/
+#include <pigpio.h>
+
+// our led matrix "ram"
 uint8_t col_a_row_0 = 0x00;
 uint8_t col_a_row_1 = 0x00;
 uint8_t col_b_row_0 = 0x00;
@@ -13,6 +17,8 @@ uint8_t col_c_row_1 = 0x00;
 #define BITON(reg,bit)  ((reg)|=(1<<(bit)))
 #define BITOFF(reg,bit) ((reg)&=~(1<<(bit)))
 
+// based on studying the family guy pinball schematics page 142,
+// we see the shift register led matrix works like this
 #define CHRIS_C(on)  (on) ? BITON(col_a_row_0,4) : BITOFF(col_a_row_0,4)
 #define CHRIS_H(on)  (on) ? BITON(col_a_row_0,3) : BITOFF(col_a_row_0,3)
 #define CHRIS_R(on)  (on) ? BITON(col_a_row_0,2) : BITOFF(col_a_row_0,2)
@@ -40,6 +46,8 @@ uint8_t col_c_row_1 = 0x00;
 #define BRIAN_A(on)  (on) ? BITON(col_c_row_1,0) : BITOFF(col_c_row_1,0)
 #define BRIAN_N(on)  (on) ? BITON(col_a_row_1,0) : BITOFF(col_a_row_1,0)
 
+// convenience functions for applying a bitmask to the letters of a 
+// name string of lights
 void chris(int value) {
     CHRIS_C( (value & 0x01) );
     CHRIS_H( (value & 0x02) );
@@ -77,23 +85,55 @@ void brian(int value) {
     BRIAN_N( (value & 0x10) );
 }
 
-#define gpio_write(b)   do { printf("gpio_write:%02x\n",b); } while(0)
-#define clock_up()      do { printf("clock_up\n"); } while(0)
-#define clock_down()    do { printf("clock_down\n"); } while(0)
 #define delay_ms(ms)    do { printf("delay_ms:%x\n",ms); usleep(ms*1000); } while(0)
 
+// arbitrary connections of the stewie pinball machine's J1 connector to our
+// raspberry pi gpios
+#define LED_MATRIX_CLK   21
+#define LED_MATRIX_D0    20
+#define LED_MATRIX_D1    16
+#define LED_MATRIX_D2    12
+#define LED_MATRIX_D3     7
+#define LED_MATRIX_D4     8
+#define LED_MATRIX_D5    25
+#define LED_MATRIX_D6    24
+#define LED_MATRIX_D7    23
+
+
 void ledwrite(uint8_t b) {
-    gpio_write( b );
-    clock_up();
+    gpioWrite( LED_MATRIX_D0, (b&0x01)?1:0 );
+    gpioWrite( LED_MATRIX_D1, (b&0x02)?1:0 );
+    gpioWrite( LED_MATRIX_D2, (b&0x04)?1:0 );
+    gpioWrite( LED_MATRIX_D3, (b&0x08)?1:0 );
+    gpioWrite( LED_MATRIX_D4, (b&0x10)?1:0 );
+    gpioWrite( LED_MATRIX_D5, (b&0x20)?1:0 );
+    gpioWrite( LED_MATRIX_D6, (b&0x40)?1:0 );
+    gpioWrite( LED_MATRIX_D7, (b&0x80)?1:0 );
     delay_ms( 1 );
-    clock_down();
+    gpioWrite( LED_MATRIX_CLK, 1 );
+    delay_ms( 1 );
+    gpioWrite( LED_MATRIX_CLK, 0 );
+    delay_ms( 1 );
 }
 
 int main (void) {
 
-    brian(0x1F); // "BRIAN"
+    gpioInitialise();
+    gpioSetMode( LED_MATRIX_CLK, PI_OUTPUT );
+    gpioSetMode( LED_MATRIX_D0, PI_OUTPUT );
+    gpioSetMode( LED_MATRIX_D1, PI_OUTPUT );
+    gpioSetMode( LED_MATRIX_D2, PI_OUTPUT );
+    gpioSetMode( LED_MATRIX_D3, PI_OUTPUT );
+    gpioSetMode( LED_MATRIX_D4, PI_OUTPUT );
+    gpioSetMode( LED_MATRIX_D5, PI_OUTPUT );
+    gpioSetMode( LED_MATRIX_D6, PI_OUTPUT );
+    gpioSetMode( LED_MATRIX_D7, PI_OUTPUT );
+    
+    brian( 0x1F ); // "BRIAN" all characters lit
 
-    for (;;) {        
+    for (;;) {
+      
+        // drive the led matrix
         ledwrite( 0x81 ); // row 0 latch
         ledwrite( col_c_row_0 );
         ledwrite( col_b_row_0 );
