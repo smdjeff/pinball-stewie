@@ -3,8 +3,8 @@
 #include <string.h>
 #include <sys/time.h>
 #include <unistd.h>
-#include <pigpio.h> // http://abyz.me.uk/rpi/pigpio/
-    
+#include "portable.h"
+
 #include "stewie-lamps.h"
     
 

@@ -3,7 +3,8 @@
 #include <string.h>
 #include <sys/time.h>
 #include <unistd.h>
-#include <pigpio.h> // http://abyz.me.uk/rpi/pigpio/
+#include <assert.h>
+#include "portable.h"
     
 #include "mcp23017.h"
     

@@ -3,7 +3,7 @@
 #include <string.h>
 #include <sys/time.h>
 #include <unistd.h>
-#include <pigpio.h> // http://abyz.me.uk/rpi/pigpio/
+#include "portable.h"
 
 // arbitrary connections of the stewie pinball machine's J1 connector 
 // to our raspberry pi gpios
@@ -21,6 +21,16 @@
 #define RISING_EDGE  1
 #define LEFT_TIMER   0
 #define RIGHT_TIMER  1
+
+static void solLeftCallback(void) {
+    gpioPWM( FLIPPER_SOL_LEFT, SOL_HOLD/*0-255*/);
+    gpioSetTimerFunc( LEFT_TIMER, 0, NULL );
+}
+
+static void solRightCallback(void) {
+    gpioPWM( FLIPPER_SOL_RIGHT, SOL_HOLD/*0-255*/);
+    gpioSetTimerFunc( RIGHT_TIMER, 0, NULL );
+}
 
 static void switchRightCallback(int gpio, int level, uint32_t tick) {
     if ( level == FALLING_EDGE ) {
@@ -40,16 +50,6 @@ static void switchLeftCallback(int gpio, int level, uint32_t tick) {
     if ( level == RISING_EDGE ) {
         gpioPWM( FLIPPER_SOL_LEFT, SOL_OFF/*0-255*/);
     }
-}
-
-static void solLeftCallback(void) {
-    gpioPWM( FLIPPER_SOL_LEFT, PWM_HOLD/*0-255*/);
-    gpioSetTimerFunc( LEFT_TIMER, 0, NULL );
-}
-
-static void solRightCallback(void) {
-    gpioPWM( FLIPPER_SOL_RIGHT, PWM_HOLD/*0-255*/);
-    gpioSetTimerFunc( RIGHT_TIMER, 0, NULL );
 }
 
 void flippersInit(void) {
