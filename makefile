@@ -1,10 +1,22 @@
-RASPBERRYPI = $(shell ./onapi)
-
-ifeq ($(RASPBERRYPI),Pi)
-all: main.c stewie-lamps.c mcp23017.c flippers.c
-	gcc -Wall -pthread -DRASPBERRYPI-o stewie main.c stewie-lamps.c mcp23017.c flippers.c -lpigpio -lrt -I.
+UNAME := $(shell uname)
+ifeq ($(UNAME),$(filter $(UNAME),raspberrypi))
+LDFLAGS += -pthread -lpigpio -lrt
 else
-all: main.c stewie-lamps.c mcp23017.c flippers.c
-	gcc -Wall -pthread -o stewie main.c stewie-lamps.c mcp23017.c flippers.c portable_stdio.c -I.
+ADD_OBJS = linux/portable.o
 endif
+
+src = $(wildcard *.c)
+obj = $(src:.c=.o) $(ADD_OBJS)
+
+%.o: %.c
+	$(CC) $(CFLAGS) -I. -o $@ -c $<
+
+stewie: $(obj)
+	$(CC) -o $@ $^ $(LDFLAGS)
+
+.PHONY: clean
+clean:
+	rm -f $(obj) stewie
+
+
 

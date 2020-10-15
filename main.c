@@ -6,8 +6,13 @@
 #include "portable.h"
 
 #include "stewie-lamps.h"
-    
+#include "flippers.h"
+#include "switches.h"
+#include "lamps.h"
+#include "display.h"
+#include "sounds.h"    
 
+    
 uint64_t time_ms(void) {
     struct timeval tv;
     gettimeofday( &tv,NULL );
@@ -18,7 +23,13 @@ uint64_t time_ms(void) {
 int main (void) {
 
     gpioInitialise();
+
     ledMatrixInit();
+    flippersInit();
+    switchesInit();
+    lampsInit();
+    displayInit();
+    soundInit();
 
     for (;;) {
 

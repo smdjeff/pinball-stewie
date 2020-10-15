@@ -7,9 +7,6 @@
     
 #include "mcp23017.h"    
 
-// arbitrary connections of the stewie pinball machine's J1 connector 
-// to our raspberry pi gpios
-#define LED_MATRIX_CLK   21
     
 // our led matrix memory map
 static uint8_t col_a_row_0 = 0x00;
@@ -90,6 +87,7 @@ void ledMatrixBrian(int value) {
 }
 
 void ledMatrixInit(void) {
+    printf("ledMatrixInit()\n");
     gpioSetMode( LED_MATRIX_CLK, PI_OUTPUT );
     mcp23017Init();
 }
