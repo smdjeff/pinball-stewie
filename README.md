@@ -1,5 +1,5 @@
 # stewie-pinball
-Stewie mini pinball machine as a stand-alone desktop toy via Raspberry Pi. 
+Stewie mini pinball machine as a WiFi connected stand-alone desktop toy. 
 
 https://sternpinball.com/game/family-guy/
 
