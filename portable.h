@@ -17,9 +17,9 @@
 #define SWITCH_MEG               24
 #define SWITCH_PETER             25
 #define SWITCH_SHOOTER           8
-#define SWITCH_DRIVE_SIGNAL      7
 #define SWITCH_BRIAN_CHRIS       12
 #define SWITCH_CHRIS_BRIAN       16    
+#define SWITCH_DRIVE_SIGNAL      7
     
 #define LED_MATRIX_CLK           6
 #define LED_MATRIX_D0_7          MCP23017_A0_7

@@ -29,31 +29,32 @@
 static int i2c_handle = -1;
 
 static void mcp23017_write(int reg, int AB, int value) {
-	unsigned reg_addr = MCP_REGISTER(reg, AB);
-	i2cWriteByteData(i2c_handle, reg_addr, value);
+  unsigned reg_addr = MCP_REGISTER(reg, AB);
+  i2cWriteByteData(i2c_handle, reg_addr, value);
 }
 
 static void mcp23017_write_both(int reg, int value) {
-	mcp23017_write(reg, GPIOA, value);
-	mcp23017_write(reg, GPIOB, value);
+  mcp23017_write(reg, GPIOA, value);
+  mcp23017_write(reg, GPIOB, value);
 }
 
 void mcp23017Output(uint8_t value) {
-	unsigned reg_addr = MCP_REGISTER(GPIO, GPIOA);
-	i2cWriteByteData(i2c_handle, reg_addr, value);
+  unsigned reg_addr = MCP_REGISTER(GPIO, GPIOA);
+  i2cWriteByteData(i2c_handle, reg_addr, value);
 }
 
 void mcp23017Init(void) {
-    i2c_handle = i2cOpen(0/*i2cBus*/, 0x20/*i2cAddr*/, 0/*i2cFlags*/);
-    assert( i2c_handle >= 0 );
-    
-	mcp23017_write_both(IOCON,0b00000000);	// MIRROR=0,ODR=0
-	mcp23017_write_both(GPINTEN,0x00);	    // no ints
-	mcp23017_write_both(DEFVAL,0x00);
-	mcp23017_write_both(OLAT,0x00);
-	mcp23017_write_both(GPPU,0b00000000);	// pullups disabled
-	mcp23017_write_both(IPOL,0b00000000);   // no polarity inversion
-	mcp23017_write_both(IODIR,0b00000000);	// all outputs
-	mcp23017_write_both(INTCON,0b00000000);	// cmp inputs to previous
-	mcp23017_write_both(GPINTEN,0b00000000);// no int on change 
+  i2c_handle = i2cOpen( 1/*i2cBus*/, 0x20/*i2cAddr*/, 0/*i2cFlags*/ );
+  // have you enabled the i2c interface via raspi-config?
+  assert( i2c_handle >= 0 );
+  
+  mcp23017_write_both(IOCON,0b00000000);	// MIRROR=0,ODR=0
+  mcp23017_write_both(GPINTEN,0x00);	    // no ints
+  mcp23017_write_both(DEFVAL,0x00);
+  mcp23017_write_both(OLAT,0x00);
+  mcp23017_write_both(GPPU,0b00000000);	// pullups disabled
+  mcp23017_write_both(IPOL,0b00000000);   // no polarity inversion
+  mcp23017_write_both(IODIR,0b00000000);	// all outputs
+  mcp23017_write_both(INTCON,0b00000000);	// cmp inputs to previous
+  mcp23017_write_both(GPINTEN,0b00000000);// no int on change 
 }

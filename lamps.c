@@ -7,9 +7,15 @@
 
 #include "lamps.h"
 
+#define LAMP_OFF      1
+#define LAMP_ON       0
     
 void lampsInit(void) {
     printf("lampsInit()\n");
+    gpioSetMode( LAMP_PLAYFIELD, PI_OUTPUT );
+    gpioSetMode( LAMP_SHOOT_AGAIN, PI_OUTPUT );
+    gpioWrite( LAMP_PLAYFIELD, LAMP_OFF );
+    gpioWrite( LAMP_SHOOT_AGAIN, LAMP_OFF );
 }
 
 

@@ -36,7 +36,7 @@ int main (void) {
         // attact mode playfield lighting
         uint64_t t = time_ms();
         static uint64_t last_t = 0;
-	    if ( t - last_t > 100 ) {
+	      if ( t - last_t > 100 ) {
             last_t = t;
             static uint8_t ct = 1;
             ledMatrixBrian( ct );
