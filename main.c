@@ -22,7 +22,6 @@ uint64_t time_ms(void) {
 }
 
 void blinkCallback(void) {
-    gpioWrite( LAMP_PLAYFIELD, !gpioRead(LAMP_PLAYFIELD) );
     gpioWrite( LAMP_SHOOT_AGAIN, !gpioRead(LAMP_SHOOT_AGAIN) );   
 }
 
@@ -36,14 +35,31 @@ void attractCallback(void) {
         ledMatrixChris( (ct>>17) & 0x1f );
         ct <<= 1;
         if ( ct > 0x3FFFFF ) {   
+            gpioWrite( LAMP_PLAYFIELD, !gpioRead(LAMP_PLAYFIELD) );
             ct = 1;
         } 
 }
 
+static void *startDisplay(void *arg) {
+   system( "python i2c-display.py" );
+}
+
+static void *playback(void *arg) {
+   char cmd[64] = {0,};
+   snprintf ( cmd, sizeof(cmd), "aplay sounds/%s", arg );
+   printf( "system:%s\n", cmd );
+   system( cmd );
+}
+
+void soundPlayFile(char *sound) {
+   gpioStartThread(playback, sound);
+}
 
 int main (void) {
 
-//    gpioCfgClock( 2, 0, 0 ); // allow a 20khz pwm
+    // https://github.com/joan2937/pigpio/issues/399
+    gpioCfgClock( 5, 0, 0 ); // tell gpio to use PWM peripheral
+
     gpioInitialise();
 
     ledMatrixInit();
@@ -57,6 +73,10 @@ int main (void) {
     assert( gpioSetTimerFunc( 4, 100, attractCallback ) == 0 );
 
     flippersEnable();
+
+    soundPlayFile( "'Timed event music.wav'" );
+    soundPlayFile( "'Small playfield intro.wav'" );
+    gpioStartThread( startDisplay, "" );
 
     for (;;) {
         usleep(100);

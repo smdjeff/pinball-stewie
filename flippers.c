@@ -10,8 +10,8 @@
 
 #define SOLENOID_ON       1
 #define SOLENOID_OFF      0
-#define SOLENOID_ON_MS    200    
-#define SOLENOID_HOLD     0.70
+#define SOLENOID_ON_MS    200
+#define SOLENOID_HOLD     0.80
 
 #define LEFT_TIMER        0
 #define RIGHT_TIMER       1
@@ -23,13 +23,13 @@
 
 static void holdLeftCallback(void) {
     printf("flipper left hold\n");
-    gpioPWM( SOLENOID_FLIPPER_LEFT, 255 * SOLENOID_HOLD );
+    gpioPWM( SOLENOID_FLIPPER_LEFT, 255.0 * SOLENOID_HOLD );
     assert( gpioCancelTimer( LEFT_TIMER ) == 0 );
 }
 
 static void holdRightCallback(void) {
     printf("flipper right hold\n");
-    gpioPWM( SOLENOID_FLIPPER_RIGHT, 255 * SOLENOID_HOLD );
+    gpioPWM( SOLENOID_FLIPPER_RIGHT, 255.0 * SOLENOID_HOLD );
     assert( gpioCancelTimer( RIGHT_TIMER ) == 0 );
 }
 
