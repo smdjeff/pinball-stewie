@@ -5,16 +5,12 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-// convenience functions for applying a bitmask to the letters of a 
-// name string of lights
+// bitmask application to letters in a named string
 void ledMatrixChris(int value);
 void ledMatrixMeg(int value);
 void ledMatrixPeter(int value);
 void ledMatrixLois(int value);
 void ledMatrixBrian(int value);
-
-// shifts our led matrix values into the playfield
-void ledMatrixRefresh(void);
 
 void ledMatrixInit(void);
     

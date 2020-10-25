@@ -42,7 +42,7 @@
 // basically just a pigpio lib that debug outputs to stdio
 // rather than real hardware
 
-#ifdef RASPBERRYPI
+#ifdef RASPBERRY
   
   #include <pigpio.h> // http://abyz.me.uk/rpi/pigpio/
   
@@ -55,13 +55,13 @@
 #define PI_PUD_UP   2
 
 typedef void (*gpioTimerFunc_t)    (void);
-typedef void (*gpioAlertFunc_t)    (int      gpio,
-                                    int      level,
-                                    uint32_t tick);
+typedef void (*gpioAlertFunc_t)    (int gpio, int level, uint32_t tick);
+
 int gpioInitialise(void);
 int gpioSetMode(unsigned gpio, unsigned mode);
 int gpioSetTimerFunc(unsigned timer, unsigned millis, gpioTimerFunc_t f);
 int gpioSetAlertFunc(unsigned user_gpio, gpioAlertFunc_t f);
+int gpioGlitchFilter(unsigned user_gpio, unsigned steady);
 int gpioWrite(unsigned gpio, unsigned level);
 int gpioRead(unsigned gpio);
 int gpioSetPullUpDown(unsigned gpio, unsigned pud);
