@@ -43,6 +43,7 @@ static void switchCallback(int gpio, int level, uint32_t tick) {
               static bool started = false;
               if ( !started ) {
                   started = true;
+                  gpioCancelTimer( TIMER_ATTRACT );
                   soundPlay( sound_start );
                   gpioWrite( LAMP_PLAYFIELD, LAMP_ON );
               }
@@ -54,7 +55,8 @@ static void switchCallback(int gpio, int level, uint32_t tick) {
             
         case SWITCH_SHOOTER:
             if ( level == 0 ) {
-                gpioWrite( LAMP_SHOOT_AGAIN, LAMP_ON );                                     assert( gpioSetTimerFunc( TIMER_SHOOTER_LAMP, 250, blinkCallback ) == 0 );
+                gpioWrite( LAMP_SHOOT_AGAIN, LAMP_ON );
+                assert( gpioSetTimerFunc( TIMER_SHOOTER_LAMP, 250, blinkCallback ) == 0 );
             } else {
                 gpioWrite( LAMP_SHOOT_AGAIN, LAMP_OFF );
                 gpioCancelTimer( TIMER_SHOOTER_LAMP );
@@ -73,16 +75,18 @@ static void switchCallback(int gpio, int level, uint32_t tick) {
     
 void switchesInit(void) {
     printf("switchesInit()\n");
-    int switches[] = {  SWITCH_START, 
-			SWITCH_LOIS, 
-			SWITCH_MEG, 
-			SWITCH_PETER, 
-			SWITCH_SHOOTER,
-			SWITCH_BRIAN_CHRIS,
-			SWITCH_CHRIS_BRIAN };
+    int switches[] = {
+        SWITCH_START,
+        SWITCH_LOIS,
+        SWITCH_MEG,
+        SWITCH_PETER,
+        SWITCH_SHOOTER,
+        SWITCH_BRIAN_CHRIS,
+        SWITCH_CHRIS_BRIAN
+    };
     for (int i=0; i<sizeof(switches)/sizeof(switches[0]); i++) {
         int gpio = switches[i];
-	gpioSetMode( gpio, PI_INPUT );
+        gpioSetMode( gpio, PI_INPUT );
         gpioSetPullUpDown( gpio, PI_PUD_UP );
         gpioGlitchFilter( gpio, 250 );
         gpioSetAlertFunc( gpio, switchCallback );

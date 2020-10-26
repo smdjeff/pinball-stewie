@@ -28,7 +28,7 @@ void soundPlay(sound_t sound) {
             break;
         
         case sound_launch: {
-            const char* s[] = {
+            char* s[] = {
                 "Launch 1",
                 "Launch 2",
                 "Launch 3",
@@ -39,7 +39,7 @@ void soundPlay(sound_t sound) {
             break; }
             
         case sound_hit: {
-            const char* s[] = {
+            char* s[] = {
                 "Hit 1",
                 "Hit 2 (fart)",
                 "Hit 3",
@@ -56,23 +56,22 @@ void soundPlay(sound_t sound) {
             break; }
             
         case sound_game_over: {
-            const char* s[]= {
+            char* s[]= {
                 "Stewie says game over man",
                 "Stewie will not tolerate failure"
             };
-            int i = (rand()%(2 + 1));    
-            gpioStartThread(playback, s[i]);
+            gpioStartThread(playback, s[rand()%(2 + 1)]);
             break; }
             
         case sound_drain: {
-            const char* s0[] = {
+            char* s0[] = {
                 "Drain music 1",
                 "Drain music 2",
                 "Drain music 3",
                 "Drain music 4",
                 "Drain music 5",
             };
-            const char* s1[] = {
+            char* s1[] = {
                 "Stewie says damn you vile woman",
                 "Stewie says one down",
                 "Stewie says what the deuce was that",
