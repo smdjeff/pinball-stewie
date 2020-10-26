@@ -33,7 +33,23 @@
 #define AUDIO_PCM_FS             19    
 #define AUDIO_PCM_CLK            18    
 #define AUDIO_PCM_DOUT           21    
- 
+
+    
+// https://github.com/joan2937/pigpio/issues/397
+#define gpioCancelTimer(t) gpioSetTimerFunc(t,PI_MIN_MS,0)
+
+#define TIMER_LEFT_FLIP     0
+#define TIMER_RIGHT_FLIP    1
+#define TIMER_MATRIX        2
+#define TIMER_SHOOTER_LAMP  3
+#define TIMER_ATTRACT       4
+#define TIMER_SHOOTER       5
+#define TIMER_6             6
+#define TIMER_7             7
+#define TIMER_8             8
+#define TIMER_9             9
+    
+
 
     
 ///////////////////////////////////////////////////////////////////////////
@@ -48,16 +64,23 @@
   
 #else
 
-#define PI_INPUT 0
-#define PI_OUTPUT 1
-#define PI_PUD_OFF  0
-#define PI_PUD_DOWN 1
-#define PI_PUD_UP   2
+#define PI_MIN_MS    0
+#define PI_INPUT     0
+#define PI_OUTPUT    1
+#define PI_PUD_OFF   0
+#define PI_PUD_DOWN  1
+#define PI_PUD_UP    2
+#define RISING_EDGE  0
+#define FALLING_EDGE 1
+    
 
 typedef void (*gpioTimerFunc_t)    (void);
 typedef void (*gpioAlertFunc_t)    (int gpio, int level, uint32_t tick);
+typedef void *(gpioThreadFunc_t)   (void*);
 
+int gpioCfgClock(unsigned micros, unsigned peripheral, unsigned source);
 int gpioInitialise(void);
+void* gpioStartThread(gpioThreadFunc_t f, void *userdata);
 int gpioSetMode(unsigned gpio, unsigned mode);
 int gpioSetTimerFunc(unsigned timer, unsigned millis, gpioTimerFunc_t f);
 int gpioSetAlertFunc(unsigned user_gpio, gpioAlertFunc_t f);
@@ -66,6 +89,8 @@ int gpioWrite(unsigned gpio, unsigned level);
 int gpioRead(unsigned gpio);
 int gpioSetPullUpDown(unsigned gpio, unsigned pud);
 int gpioPWM(unsigned user_gpio, unsigned dutycycle);
+int gpioSetPWMfrequency(unsigned gpio, unsigned frequency);
+int gpioGetPWMfrequency(unsigned gpio);
 int i2cWriteByteData(unsigned handle, unsigned i2cReg, unsigned bVal);
 int i2cOpen(unsigned i2cBus, unsigned i2cAddr, unsigned i2cFlags);
 

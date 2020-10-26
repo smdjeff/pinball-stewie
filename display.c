@@ -8,8 +8,14 @@
 #include "display.h"
 
     
+static void *startDisplay(void *arg) {
+   system( "python i2c-display.py" );
+}
+
+    
 void displayInit(void) {
     printf("displayInit()\n");
+    gpioStartThread( startDisplay, "" );
 }
 
 

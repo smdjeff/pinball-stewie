@@ -4,6 +4,7 @@ LDFLAGS += -pthread -lpigpio -lrt
 CFLAGS += -DRASPBERRY
 else
 ADD_OBJS = linux/portable.o
+LDFLAGS += -pthread
 endif
 
 src = $(wildcard *.c)

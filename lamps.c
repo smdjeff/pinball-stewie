@@ -7,8 +7,6 @@
 
 #include "lamps.h"
 
-#define LAMP_OFF      0
-#define LAMP_ON       1
     
 void lampsInit(void) {
     printf("lampsInit()\n");

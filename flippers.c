@@ -13,35 +13,27 @@
 #define SOLENOID_ON_MS    200
 #define SOLENOID_HOLD     0.80
 
-#define LEFT_TIMER        0
-#define RIGHT_TIMER       1
-
-
-// https://github.com/joan2937/pigpio/issues/397
-#define gpioCancelTimer(t) gpioSetTimerFunc(t,PI_MIN_MS,0)
-
-
 static void holdLeftCallback(void) {
     printf("flipper left hold\n");
     gpioPWM( SOLENOID_FLIPPER_LEFT, 255.0 * SOLENOID_HOLD );
-    assert( gpioCancelTimer( LEFT_TIMER ) == 0 );
+    assert( gpioCancelTimer( TIMER_LEFT_FLIP ) == 0 );
 }
 
 static void holdRightCallback(void) {
     printf("flipper right hold\n");
     gpioPWM( SOLENOID_FLIPPER_RIGHT, 255.0 * SOLENOID_HOLD );
-    assert( gpioCancelTimer( RIGHT_TIMER ) == 0 );
+    assert( gpioCancelTimer( TIMER_RIGHT_FLIP ) == 0 );
 }
 
 static void switchRightCallback(int gpio, int level, uint32_t tick) {
     if ( level == RISING_EDGE ) {
         printf("flipper right on\n");  
         gpioWrite( SOLENOID_FLIPPER_RIGHT, SOLENOID_ON );
-        assert( gpioSetTimerFunc( RIGHT_TIMER, SOLENOID_ON_MS, holdRightCallback ) == 0 );
+        assert( gpioSetTimerFunc( TIMER_RIGHT_FLIP, SOLENOID_ON_MS, holdRightCallback ) == 0 );
     } else {
         printf("flipper right off\n");  
         gpioWrite( SOLENOID_FLIPPER_RIGHT, SOLENOID_OFF );
-        assert( gpioCancelTimer( RIGHT_TIMER ) == 0 );
+        assert( gpioCancelTimer( TIMER_RIGHT_FLIP ) == 0 );
     }
 }
 
@@ -49,11 +41,11 @@ static void switchLeftCallback(int gpio, int level, uint32_t tick) {
     if ( level == RISING_EDGE ) {
         printf("flipper left on\n");
         gpioWrite( SOLENOID_FLIPPER_LEFT, SOLENOID_ON );
-        assert( gpioSetTimerFunc( LEFT_TIMER, SOLENOID_ON_MS, holdLeftCallback ) == 0 );
+        assert( gpioSetTimerFunc( TIMER_LEFT_FLIP, SOLENOID_ON_MS, holdLeftCallback ) == 0 );
     } else {
         printf("flipper left off\n");
         gpioWrite( SOLENOID_FLIPPER_LEFT, SOLENOID_OFF );
-        assert( gpioCancelTimer( LEFT_TIMER ) == 0 );
+        assert( gpioCancelTimer( TIMER_LEFT_FLIP ) == 0 );
     }
 }
 
@@ -86,8 +78,8 @@ void flippersDisable(void) {
     printf("flippersDisable()\n");
     gpioSetAlertFunc( SWITCH_FLIPPER_RIGHT, NULL );
     gpioSetAlertFunc( SWITCH_FLIPPER_LEFT, NULL );
-    gpioCancelTimer( LEFT_TIMER );
-    gpioCancelTimer( RIGHT_TIMER );
+    gpioCancelTimer( TIMER_LEFT_FLIP );
+    gpioCancelTimer( TIMER_RIGHT_FLIP );
     gpioWrite( SOLENOID_FLIPPER_LEFT, SOLENOID_OFF );
     gpioWrite( SOLENOID_FLIPPER_RIGHT,SOLENOID_OFF );    
 }

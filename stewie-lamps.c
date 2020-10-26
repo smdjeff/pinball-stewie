@@ -60,16 +60,13 @@ void ledMatrixBrian(int value) {
 
 static void writeRow(uint8_t b) {
   gpioWrite( LED_MATRIX_CLK, 0 );
-  //usleep( 100 );
   mcp23017Output( b );
-  //usleep( 100 );
   gpioWrite( LED_MATRIX_CLK, 1 );
-  //usleep( 100 );
 }
 
 static void matrixRefresh(void) {
   static uint8_t r = 0;
-  // d7 blanks display when high (when shifted to IC1's outputs)
+  // d7 blanks all lamps when high (when shifted to IC1's outputs)
   // d0,d1 inverted set row enable (when shifted to IC5's output)
   // the logic of the discretes T1,T2 for display blanking is:
   // CLK d7  OC 
@@ -98,8 +95,8 @@ void ledMatrixInit(void) {
   printf("ledMatrixInit()\n");
   gpioSetMode( LED_MATRIX_CLK, PI_OUTPUT );
   mcp23017Init();
-  writeRow( 0x80 );
-  assert( gpioSetTimerFunc( 2, 10, matrixRefresh ) == 0);
+  writeRow( 0x80 ); // blank all lamps
+  assert( gpioSetTimerFunc( TIMER_MATRIX, 10, matrixRefresh ) == 0);
 }
 
 

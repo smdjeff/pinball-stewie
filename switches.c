@@ -3,7 +3,10 @@
 #include <string.h>
 #include <sys/time.h>
 #include <unistd.h>
+#include <assert.h>
 #include "portable.h"
+#include "lamps.h"
+#include "sounds.h"
 
 #include "switches.h"
 
@@ -24,18 +27,47 @@ static char* switchName(int gpio) {
 
 static void shooterOff(void) {
    gpioWrite( SOLENOID_SHOOTER, 0 );
-   gpioSetTimerFunc( 5, PI_MIN_MS, 0);
+   gpioCancelTimer( TIMER_SHOOTER );
+}
+
+static void blinkCallback(void) {
+    gpioWrite( LAMP_SHOOT_AGAIN, !gpioRead(LAMP_SHOOT_AGAIN) );   
 }
 
 static void switchCallback(int gpio, int level, uint32_t tick) {
     printf("switch %s %d\n", switchName(gpio), level);
     switch ( gpio ) {
+            
        case SWITCH_START:
-           if ( level == 0 ) { 
+           if ( level == 0 ) {
+              static bool started = false;
+              if ( !started ) {
+                  started = true;
+                  soundPlay( sound_start );
+                  gpioWrite( LAMP_PLAYFIELD, LAMP_ON );
+              }
+              soundPlay( sound_launch );
               gpioWrite( SOLENOID_SHOOTER, 1 );
-              gpioSetTimerFunc( 5, 100, shooterOff );
+              gpioSetTimerFunc( TIMER_SHOOTER, 100, shooterOff );
            }
            break;
+            
+        case SWITCH_SHOOTER:
+            if ( level == 0 ) {
+                gpioWrite( LAMP_SHOOT_AGAIN, LAMP_ON );                                     assert( gpioSetTimerFunc( TIMER_SHOOTER_LAMP, 250, blinkCallback ) == 0 );
+            } else {
+                gpioWrite( LAMP_SHOOT_AGAIN, LAMP_OFF );
+                gpioCancelTimer( TIMER_SHOOTER_LAMP );
+            }
+            break;
+            
+        case SWITCH_LOIS:
+        case SWITCH_MEG:
+        case SWITCH_PETER:
+        case SWITCH_BRIAN_CHRIS:
+        case SWITCH_CHRIS_BRIAN:
+            soundPlay( sound_hit );
+            break;
     }
 }
     

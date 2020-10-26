@@ -21,39 +21,60 @@ uint64_t time_ms(void) {
     return (((long long)tv.tv_sec)*1000)+(tv.tv_usec/1000);
 }
 
-void blinkCallback(void) {
-    gpioWrite( LAMP_SHOOT_AGAIN, !gpioRead(LAMP_SHOOT_AGAIN) );   
-}
 
 void attractCallback(void) {
-	static uint32_t ct = 1;
-        ledMatrixBrian( ct & 0x1f );
-        ledMatrixPeter( ct & 0x1f );
-        ledMatrixMeg( (ct>>5) & 0x07 );
-//        ledMatrixPeter( (ct>>8) &0x1f  );
-        ledMatrixLois( (ct>>13) & 0x0f );
-        ledMatrixChris( (ct>>17) & 0x1f );
-        ct <<= 1;
-        if ( ct > 0x3FFFFF ) {   
-            gpioWrite( LAMP_PLAYFIELD, !gpioRead(LAMP_PLAYFIELD) );
-            ct = 1;
-        } 
+    static int st = 0;
+    static uint32_t ct = 1;
+    
+    switch ( st ) {
+            
+        case 0:
+            ledMatrixBrian( ct & 0x1f );
+            ledMatrixMeg( (ct>>5) & 0x07 );
+            ledMatrixPeter( (ct>>8) &0x1f  );
+            ledMatrixLois( (ct>>13) & 0x0f );
+            ledMatrixChris( (ct>>17) & 0x1f );
+            ct <<= 1;
+            if ( ct > 0x3FFFFF ) {
+                ct = 1;
+                st++;
+            }
+            break;
+        case 1:
+            ledMatrixBrian( ct & 0x1f );
+            ledMatrixMeg( ct & 0x07 );
+            ledMatrixPeter( ct & 0x1f );
+            ledMatrixLois( ct & 0x0f );
+            ledMatrixChris( ct & 0x1f );
+            ct <<= 1;
+            if ( ct > 0x1f ) {
+                ct = 1;
+                st++;
+            }
+            break;
+        case 2:
+            switch( ct ) {
+                case 1: ledMatrixBrian( 0x1f ); ct++; break;
+                case 2: ledMatrixBrian( 0x00 ); ct++; break;
+                case 3: ledMatrixMeg( 0x07 ); ct++; break;
+                case 4: ledMatrixMeg( 0x00 ); ct++; break;
+                case 5: ledMatrixPeter( 0x1f ); ct++; break;
+                case 6: ledMatrixPeter( 0x00 ); ct++; break;
+                case 7: ledMatrixLois( 0x0f ); ct++; break;
+                case 8: ledMatrixLois( 0x00 ); ct++; break;
+                case 9: ledMatrixChris( 0x1f ); ct++; break;
+                case 10: ledMatrixChris( 0x00 ); ct++; break;
+                default: ct = 1; st++; break;
+            }
+            break;
+            
+        default:
+            st = 0;
+            break;
+
+    }
 }
 
-static void *startDisplay(void *arg) {
-   system( "python i2c-display.py" );
-}
-
-static void *playback(void *arg) {
-   char cmd[64] = {0,};
-   snprintf ( cmd, sizeof(cmd), "aplay sounds/%s", arg );
-   printf( "system:%s\n", cmd );
-   system( cmd );
-}
-
-void soundPlayFile(char *sound) {
-   gpioStartThread(playback, sound);
-}
 
 int main (void) {
 
@@ -69,14 +90,11 @@ int main (void) {
     displayInit();
     soundInit();
 
-    assert( gpioSetTimerFunc( 3, 1000, blinkCallback ) == 0 );
-    assert( gpioSetTimerFunc( 4, 100, attractCallback ) == 0 );
+    soundPlay( sound_hit );
+    
+    assert( gpioSetTimerFunc( TIMER_ATTRACT, 100, attractCallback ) == 0 );
 
     flippersEnable();
-
-    soundPlayFile( "'Timed event music.wav'" );
-    soundPlayFile( "'Small playfield intro.wav'" );
-    gpioStartThread( startDisplay, "" );
 
     for (;;) {
         usleep(100);

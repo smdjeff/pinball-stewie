@@ -7,6 +7,8 @@
 
 typedef enum {
     sound_start,
+    sound_launch,
+    sound_hit,
     sound_game_over,
     sound_drain,
 } sound_t;
