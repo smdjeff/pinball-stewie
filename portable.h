@@ -41,7 +41,7 @@
 #define TIMER_LEFT_FLIP     0
 #define TIMER_RIGHT_FLIP    1
 #define TIMER_MATRIX        2
-#define TIMER_SHOOTER_LAMP  3
+#define TIMER_BLINK         3
 #define TIMER_ATTRACT       4
 #define TIMER_SHOOTER       5
 #define TIMER_6             6

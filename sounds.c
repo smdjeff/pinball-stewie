@@ -23,9 +23,20 @@ void soundPlay(sound_t sound) {
     printf("soundPlay:%d\n", sound);
     
     switch( sound ) {
-        case sound_start:
-            gpioStartThread(playback, "Main theme music");
-            break;
+        case sound_start: {
+            char* s0[]= {
+                "Main theme music",
+                "Timed event music",
+                "Chris theme music",
+            };
+//            gpioStartThread(playback, s0[rand()/(RAND_MAX / 3 + 1)]);
+            char* s1[]= {
+                "Stewie is going to kick your ass",
+                "Small playfield intro",
+                "Multiball start",
+            };
+//            gpioStartThread(playback, s1[rand()/(RAND_MAX / 3 + 1)]);
+            break; }
         
         case sound_launch: {
             char* s[] = {
@@ -35,7 +46,7 @@ void soundPlay(sound_t sound) {
                 "Launch 4",
                 "Launch 5"
             };
-            gpioStartThread(playback, s[rand()%(5 + 1)]);
+            gpioStartThread(playback, s[rand()/(RAND_MAX / 5 + 1)]);
             break; }
             
         case sound_hit: {
@@ -52,7 +63,7 @@ void soundPlay(sound_t sound) {
                 "Hit 10",
                 "Hit 11"
             };
-            gpioStartThread(playback, s[rand()%(11 + 1)]);
+            gpioStartThread(playback, s[rand()/(RAND_MAX / 10 + 1)]);
             break; }
             
         case sound_game_over: {
@@ -60,7 +71,7 @@ void soundPlay(sound_t sound) {
                 "Stewie says game over man",
                 "Stewie will not tolerate failure"
             };
-            gpioStartThread(playback, s[rand()%(2 + 1)]);
+            gpioStartThread(playback, s[rand()/(RAND_MAX / 2 + 1)]);
             break; }
             
         case sound_drain: {
@@ -77,10 +88,54 @@ void soundPlay(sound_t sound) {
                 "Stewie says what the deuce was that",
                 "Stewie says you're doin' good"
             };
-            gpioStartThread(playback, s0[rand()%(5 + 1)]);
-            gpioStartThread(playback, s1[rand()%(4 + 1)]);
+            gpioStartThread(playback, s0[rand()/(RAND_MAX / 5 + 1)]);
+            //gpioStartThread(playback, s1[rand()/(RAND_MAX / 4 + 1)]);
             break; }
-            
+
+        case sound_brian: {
+            char* s[]= {
+                "Brian asks if anyone wants a mojito",
+                "Brian says good good so far",
+                "Brian says wow",
+            };
+            gpioStartThread(playback, s[rand()/(RAND_MAX / 3 + 1)]);
+            break; }
+
+        case sound_meg: {
+            char* s[]= {
+                "Meg cries",
+                "Meg hates everyone",
+                "Meg wants Lois to do something"
+            };
+            gpioStartThread(playback, s[rand()/(RAND_MAX / 3 + 1)]);
+            break; }
+
+        case sound_peter: {
+            char* s[]= {
+                "Peter giggles",
+                "Peter has an idea",
+                "Peter says that was awesome",
+                "Peter says you bastard"
+            };
+            gpioStartThread(playback, s[rand()/(RAND_MAX / 4 + 1)]);
+            break; }
+
+        case sound_lois: {
+            char* s[]= {
+                "Lois advises Meg",
+                "Lois isn't wearing any panties",
+                "Lois says what on earth was that"
+            };
+            gpioStartThread(playback, s[rand()/(RAND_MAX / 3 + 1)]);
+            break; }
+
+        case sound_chris: {
+            char* s[]= {
+                "Chris isn't supposed to mention poo",
+                "Someone peed in Chris' pants"
+            };
+            gpioStartThread(playback, s[rand()/(RAND_MAX / 2 + 1)]);
+            break; }
     }
 }
 

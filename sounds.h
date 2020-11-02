@@ -11,6 +11,11 @@ typedef enum {
     sound_hit,
     sound_game_over,
     sound_drain,
+    sound_brian,
+    sound_meg,
+    sound_peter,
+    sound_lois,
+    sound_chris
 } sound_t;
     
 void soundInit(void);

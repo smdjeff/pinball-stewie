@@ -35,7 +35,8 @@ void attractCallback(void) {
             ledMatrixLois( (ct>>13) & 0x0f );
             ledMatrixChris( (ct>>17) & 0x1f );
             ct <<= 1;
-            if ( ct > 0x3FFFFF ) {
+            if ( ct > 0x7FFFFF ) {
+                ledMatrixClear();
                 ct = 1;
                 st++;
             }
@@ -47,24 +48,27 @@ void attractCallback(void) {
             ledMatrixLois( ct & 0x0f );
             ledMatrixChris( ct & 0x1f );
             ct <<= 1;
-            if ( ct > 0x1f ) {
+            if ( ct > 0x3f ) {
+                ledMatrixClear();
                 ct = 1;
                 st++;
             }
             break;
         case 2:
             switch( ct ) {
-                case 1: ledMatrixBrian( 0x1f ); ct++; break;
-                case 2: ledMatrixBrian( 0x00 ); ct++; break;
-                case 3: ledMatrixMeg( 0x07 ); ct++; break;
-                case 4: ledMatrixMeg( 0x00 ); ct++; break;
-                case 5: ledMatrixPeter( 0x1f ); ct++; break;
-                case 6: ledMatrixPeter( 0x00 ); ct++; break;
-                case 7: ledMatrixLois( 0x0f ); ct++; break;
-                case 8: ledMatrixLois( 0x00 ); ct++; break;
-                case 9: ledMatrixChris( 0x1f ); ct++; break;
-                case 10: ledMatrixChris( 0x00 ); ct++; break;
-                default: ct = 1; st++; break;
+                case 1: ledMatrixClear(); ledMatrixBrian( 0x1f ); ct++; break;
+                case 2: ledMatrixClear(); ledMatrixMeg( 0x07 ); ct++; break;
+                case 3: ledMatrixClear(); ledMatrixPeter( 0x1f ); ct++; break;
+                case 4: ledMatrixClear(); ledMatrixLois( 0x0f ); ct++; break;
+                case 5: ledMatrixClear(); ledMatrixChris( 0x1f ); ct++; break;
+                case 6: ledMatrixClear(); ledMatrixLois( 0x0f ); ct++; break;
+                case 7: ledMatrixClear(); ledMatrixPeter( 0x1f ); ct++; break;
+                case 8: ledMatrixClear(); ledMatrixMeg( 0x07 ); ct++; break;
+                case 9: ledMatrixClear(); ledMatrixBrian( 0x1f ); ct++; break;
+                case 10: ledMatrixBrian( 0x1f ); ledMatrixMeg( 0x07 ); ledMatrixPeter( 0x1f ); ledMatrixLois( 0x0f ); ledMatrixChris( 0x1f ); ct++; break;
+                case 11: ledMatrixClear(); ct++; break;
+                case 12: ledMatrixBrian( 0x1f ); ledMatrixMeg( 0x07 ); ledMatrixPeter( 0x1f ); ledMatrixLois( 0x0f ); ledMatrixChris( 0x1f ); ct++; break;
+                default: ledMatrixClear(); ct = 1; st++; break;
             }
             break;
             

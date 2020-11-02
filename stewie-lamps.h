@@ -13,6 +13,7 @@ void ledMatrixLois(int value);
 void ledMatrixBrian(int value);
 
 void ledMatrixInit(void);
+void ledMatrixClear(void);
     
 #endif // _STEWIE_LAMPS_H_
 

@@ -21,12 +21,12 @@ static uint8_t c_2[ 2 ] = { 0x00,0x00 };
 #define SET_BIT(reg,bit)  ((reg) |= (1<<(bit)))
 #define CLR_BIT(reg,bit)  ((reg) &= ~(1<<(bit)))
        
-void ledMatrixChris(int value) {
-  (value & 0x01) ? SET_BIT(c_0[r_1],4) : CLR_BIT(c_0[r_1],4); // C
-  (value & 0x02) ? SET_BIT(c_0[r_1],3) : CLR_BIT(c_0[r_1],3); // H
-  (value & 0x04) ? SET_BIT(c_0[r_1],2) : CLR_BIT(c_0[r_1],2); // R
-  (value & 0x08) ? SET_BIT(c_0[r_1],1) : CLR_BIT(c_0[r_1],1); // I
-  (value & 0x10) ? SET_BIT(c_0[r_1],0) : CLR_BIT(c_0[r_1],0); // S
+void ledMatrixBrian(int value) {
+  (value & 0x01) ? SET_BIT(c_0[r_1],4) : CLR_BIT(c_0[r_1],4); // B
+  (value & 0x02) ? SET_BIT(c_0[r_1],3) : CLR_BIT(c_0[r_1],3); // R
+  (value & 0x04) ? SET_BIT(c_0[r_1],2) : CLR_BIT(c_0[r_1],2); // I
+  (value & 0x08) ? SET_BIT(c_0[r_1],1) : CLR_BIT(c_0[r_1],1); // A
+  (value & 0x10) ? SET_BIT(c_0[r_1],0) : CLR_BIT(c_0[r_1],0); // N
 }
 
 void ledMatrixMeg(int value) {
@@ -50,12 +50,12 @@ void ledMatrixLois(int value) {
   (value & 0x08) ? SET_BIT(c_2[r_1],0) : CLR_BIT(c_2[r_1],0); // S
 }
 
-void ledMatrixBrian(int value) {
-  (value & 0x01) ? SET_BIT(c_2[r_0],3) : CLR_BIT(c_2[r_0],3); // B
-  (value & 0x02) ? SET_BIT(c_2[r_0],2) : CLR_BIT(c_2[r_0],2); // R
-  (value & 0x04) ? SET_BIT(c_2[r_0],1) : CLR_BIT(c_2[r_0],1); // I
-  (value & 0x08) ? SET_BIT(c_2[r_0],0) : CLR_BIT(c_2[r_0],0); // A
-  (value & 0x10) ? SET_BIT(c_0[r_0],0) : CLR_BIT(c_0[r_0],0); // N
+void ledMatrixChris(int value) {
+  (value & 0x01) ? SET_BIT(c_2[r_0],3) : CLR_BIT(c_2[r_0],3); // C
+  (value & 0x02) ? SET_BIT(c_2[r_0],2) : CLR_BIT(c_2[r_0],2); // H
+  (value & 0x04) ? SET_BIT(c_2[r_0],1) : CLR_BIT(c_2[r_0],1); // R
+  (value & 0x08) ? SET_BIT(c_2[r_0],0) : CLR_BIT(c_2[r_0],0); // I
+  (value & 0x10) ? SET_BIT(c_0[r_0],0) : CLR_BIT(c_0[r_0],0); // S
 }
 
 static void writeRow(uint8_t b) {
@@ -89,6 +89,12 @@ static void matrixRefresh(void) {
     writeRow( c_0[r_1] );
     r = 0;
   }
+}
+
+void ledMatrixClear(void) {
+  memset( c_2, 0x00, sizeof(c_2) );
+  memset( c_1, 0x00, sizeof(c_1) );
+  memset( c_0, 0x00, sizeof(c_0) );
 }
 
 void ledMatrixInit(void) {

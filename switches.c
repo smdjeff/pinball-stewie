@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <assert.h>
 #include "portable.h"
+#include "stewie-lamps.h"
 #include "lamps.h"
 #include "sounds.h"
 
@@ -30,11 +31,11 @@ static void shooterOff(void) {
    gpioCancelTimer( TIMER_SHOOTER );
 }
 
-static void blinkCallback(void) {
-    gpioWrite( LAMP_SHOOT_AGAIN, !gpioRead(LAMP_SHOOT_AGAIN) );   
-}
 
 static void switchCallback(int gpio, int level, uint32_t tick) {
+    static bool brian_sw = false;
+    static bool chris_sw = false;
+    
     printf("switch %s %d\n", switchName(gpio), level);
     switch ( gpio ) {
             
@@ -43,6 +44,7 @@ static void switchCallback(int gpio, int level, uint32_t tick) {
               static bool started = false;
               if ( !started ) {
                   started = true;
+                  ledMatrixClear();
                   gpioCancelTimer( TIMER_ATTRACT );
                   soundPlay( sound_start );
                   gpioWrite( LAMP_PLAYFIELD, LAMP_ON );
@@ -55,21 +57,102 @@ static void switchCallback(int gpio, int level, uint32_t tick) {
             
         case SWITCH_SHOOTER:
             if ( level == 0 ) {
-                gpioWrite( LAMP_SHOOT_AGAIN, LAMP_ON );
-                assert( gpioSetTimerFunc( TIMER_SHOOTER_LAMP, 250, blinkCallback ) == 0 );
+                soundPlay( sound_drain );
+                lampsBlink( blink_shoot_again );
             } else {
-                gpioWrite( LAMP_SHOOT_AGAIN, LAMP_OFF );
-                gpioCancelTimer( TIMER_SHOOTER_LAMP );
+                lampsBlink( blink_none );
             }
             break;
             
-        case SWITCH_LOIS:
-        case SWITCH_MEG:
-        case SWITCH_PETER:
-        case SWITCH_BRIAN_CHRIS:
-        case SWITCH_CHRIS_BRIAN:
+        case SWITCH_LOIS: {
+            if ( level != 0 ) {
+               break;
+            }
+            static int j = 0;
+            j |= 0x01;
+            ledMatrixLois( j );
+            j <<= 1;
+            if ( j > 0x0F ) {
+                j = 0;
+                soundPlay( sound_lois );
+                lampsBlink( blink_lois );
+            }
             soundPlay( sound_hit );
-            break;
+            break; }   
+
+        case SWITCH_MEG: {
+            if ( level != 0 ) {
+               break;
+            }
+            static int j = 0;
+            j |= 0x01;
+            ledMatrixMeg( j );
+            j <<= 1;
+            if ( j > 0x07 ) {
+                j = 0;
+                soundPlay( sound_meg );
+                lampsBlink( blink_meg );
+            }
+            soundPlay( sound_hit );
+            break; } 
+
+        case SWITCH_PETER: {
+            if ( level != 0 ) {
+               break;
+            }
+            static int j = 0;
+            j |= 0x01;
+            ledMatrixPeter( j );
+            j <<= 1;
+            if ( j > 0x1F ) {
+                j = 0;
+                soundPlay( sound_peter );
+                lampsBlink( blink_peter );
+            }
+            soundPlay( sound_hit );
+            break; } 
+
+        case SWITCH_BRIAN_CHRIS: {
+            if ( level != 0 ) {
+               break;
+            }
+            if ( !brian_sw ) {
+               chris_sw = true;
+               break;
+            }
+            brian_sw = false; 
+            static int j = 0;
+            j |= 0x01;
+            ledMatrixChris( j );
+            j <<= 1;
+            if ( j > 0x1F ) {
+                j = 0;
+                soundPlay( sound_chris );
+                lampsBlink( blink_chris );
+            }
+            soundPlay( sound_hit );
+            break; } 
+
+        case SWITCH_CHRIS_BRIAN: {
+            if ( level != 0 ) {
+               break;
+            }
+            if ( !chris_sw ) {
+               brian_sw = true;
+               break;
+            }
+            chris_sw = false;
+            static int j = 0;
+            j |= 0x01;
+            ledMatrixBrian( j );
+            j <<= 1;
+            if ( j > 0x1F ) {
+                j = 0;
+                soundPlay( sound_brian );
+                lampsBlink( blink_brian );
+            }
+            soundPlay( sound_hit );
+            break; } 
     }
 }
     
@@ -91,6 +174,7 @@ void switchesInit(void) {
         gpioGlitchFilter( gpio, 250 );
         gpioSetAlertFunc( gpio, switchCallback );
     }
+    gpioGlitchFilter( SWITCH_SHOOTER, 1000 );
     gpioSetMode( SWITCH_DRIVE_SIGNAL, PI_OUTPUT );
     gpioWrite( SWITCH_DRIVE_SIGNAL, 0 );
 }
