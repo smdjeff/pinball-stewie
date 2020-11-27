@@ -8,6 +8,7 @@
 #include "stewie-lamps.h"
 #include "lamps.h"
 #include "sounds.h"
+#include "display.h"
 
 #include "switches.h"
 
@@ -31,6 +32,13 @@ static void shooterOff(void) {
    gpioCancelTimer( TIMER_SHOOTER );
 }
 
+int score = 0;
+static addScore( int points ) {
+   char s[10] = {0,};
+   score += points;
+   snprintf(s, sizeof(s)-1, "%d", score );
+   displayText( s );
+}
 
 static void switchCallback(int gpio, int level, uint32_t tick) {
     static bool brian_sw = false;
@@ -48,6 +56,7 @@ static void switchCallback(int gpio, int level, uint32_t tick) {
                   gpioCancelTimer( TIMER_ATTRACT );
                   soundPlay( sound_start );
                   gpioWrite( LAMP_PLAYFIELD, LAMP_ON );
+                  addScore( 0 );
               }
               soundPlay( sound_launch );
               gpioWrite( SOLENOID_SHOOTER, 1 );
@@ -77,6 +86,7 @@ static void switchCallback(int gpio, int level, uint32_t tick) {
                 soundPlay( sound_lois );
                 lampsBlink( blink_lois );
             }
+            addScore( 100 );
             soundPlay( sound_hit );
             break; }   
 

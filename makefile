@@ -1,6 +1,6 @@
 UNAME := $(shell uname -n)
 ifeq ($(UNAME),raspberrypi)
-LDFLAGS += -pthread -lpigpio -lrt
+LDFLAGS += -pthread -lpigpio -lrt -lzmq
 CFLAGS += -DRASPBERRY
 else
 ADD_OBJS = linux/portable.o

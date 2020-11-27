@@ -13,14 +13,15 @@ void soundInit(void) {
 }
 
 static void *playback(void *arg) {
-   char cmd[64] = {0,};
-   snprintf ( cmd, sizeof(cmd), "aplay \"sounds/%s.wav\"", arg );
-   printf( "system:%s\n", cmd );
+   char cmd[128] = {0,};
+   snprintf ( cmd, sizeof(cmd), "aplay \"sounds/%s.wav\" > /dev/null 2>&1", arg );
+   printf( "play:%s\n", arg );
+   //printf( "system:%s\n", cmd );
    system( cmd );
 }
 
 void soundPlay(sound_t sound) {
-    printf("soundPlay:%d\n", sound);
+    //printf("soundPlay:%d\n", sound);
     
     switch( sound ) {
         case sound_start: {
