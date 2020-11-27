@@ -20,36 +20,60 @@ void lampsInit(void) {
 
 
 static blinks_t blinker = 0;
+static uint8_t sequence3[] = { 0x06, 0x04, 0x00, 0x07, 0x06, 0x04, 0x00 };
+static uint8_t sequence4[] = { 0x0e, 0x0c, 0x08, 0x00, 0x0f, 0x0e, 0x0c, 0x08, 0x00 };
+static uint8_t sequence5[] = { 0x1e, 0x1c, 0x18, 0x10, 0x00, 0x1f, 0x1e, 0x1c, 0x18, 0x10, 0x00 };
 
 static void blinkCallback(void) {
-    static int j = 0;
     switch ( blinker ) {
         case blink_shoot_again:
              gpioWrite( LAMP_SHOOT_AGAIN, !gpioRead( LAMP_SHOOT_AGAIN ) );
              break;
-        case blink_brian:
-             switch(j) {
-                 case 0: ledMatrixBrian( 0x1e ); j++; break;
-                 case 1: ledMatrixBrian( 0x1c ); j++; break;
-                 case 2: ledMatrixBrian( 0x18 ); j++; break;
-                 case 3: ledMatrixBrian( 0x10 ); j++; break;
-                 case 4: ledMatrixBrian( 0x00 ); j++; break;
-                 case 5: ledMatrixBrian( 0x1f ); j++; break;
-                 case 6: ledMatrixBrian( 0x1e ); j++; break;
-                 case 7: ledMatrixBrian( 0x1c ); j++; break;
-                 case 8: ledMatrixBrian( 0x18 ); j++; break;
-                 case 9: ledMatrixBrian( 0x10 ); j++; break;
-                 case 10: ledMatrixBrian( 0x00 ); j=0; gpioCancelTimer( TIMER_BLINK ); break;
+        case blink_brian: {
+             static int i = 0;
+             uint8_t s = sequence5[ i++ ];
+             ledMatrixBrian( s );
+             if ( i >= sizeof(sequence5) ) {
+               i = 0;
+               gpioCancelTimer( TIMER_BLINK );
              }
-             break; 
-         case blink_meg:
-             break;
-         case blink_peter:
-             break; 
-        case blink_lois:
-             break;
-        case blink_chris:
-             break; 
+             break; }
+         case blink_meg: {
+              static int i = 0;
+              uint8_t s = sequence3[ i++ ];
+              ledMatrixMeg( s );
+              if ( i >= sizeof(sequence3) ) {
+                i = 0;
+                gpioCancelTimer( TIMER_BLINK );
+              }
+              break; }
+        case blink_peter: {
+             static int i = 0;
+             uint8_t s = sequence5[ i++ ];
+             ledMatrixPeter( s );
+             if ( i >= sizeof(sequence5) ) {
+               i = 0;
+               gpioCancelTimer( TIMER_BLINK );
+             }
+             break; }
+         case blink_lois: {
+              static int i = 0;
+              uint8_t s = sequence4[ i++ ];
+              ledMatrixLois( s );
+              if ( i >= sizeof(sequence4) ) {
+                i = 0;
+                gpioCancelTimer( TIMER_BLINK );
+              }
+              break; }
+        case blink_chris: {
+             static int i = 0;
+             uint8_t s = sequence5[ i++ ];
+             ledMatrixChris( s );
+             if ( i >= sizeof(sequence5) ) {
+               i = 0;
+               gpioCancelTimer( TIMER_BLINK );
+             }
+             break; }
    }    
 }
 

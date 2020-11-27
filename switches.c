@@ -33,11 +33,11 @@ static void shooterOff(void) {
 }
 
 int score = 0;
-static addScore( int points ) {
-   char s[10] = {0,};
+static void addScore( int points, char *text ) {
    score += points;
-   snprintf(s, sizeof(s)-1, "%d", score );
-   displayText( s );
+   if ( strlen(text) ) {
+      displayText( text );
+   }
 }
 
 static void switchCallback(int gpio, int level, uint32_t tick) {
@@ -56,7 +56,7 @@ static void switchCallback(int gpio, int level, uint32_t tick) {
                   gpioCancelTimer( TIMER_ATTRACT );
                   soundPlay( sound_start );
                   gpioWrite( LAMP_PLAYFIELD, LAMP_ON );
-                  addScore( 0 );
+                  addScore( 0, "" );
               }
               soundPlay( sound_launch );
               gpioWrite( SOLENOID_SHOOTER, 1 );
@@ -85,8 +85,10 @@ static void switchCallback(int gpio, int level, uint32_t tick) {
                 j = 0;
                 soundPlay( sound_lois );
                 lampsBlink( blink_lois );
+                addScore( 100, "*LOIS*" );
+            } else {
+            	addScore( 10, "" );
             }
-            addScore( 100 );
             soundPlay( sound_hit );
             break; }   
 
@@ -102,7 +104,10 @@ static void switchCallback(int gpio, int level, uint32_t tick) {
                 j = 0;
                 soundPlay( sound_meg );
                 lampsBlink( blink_meg );
-            }
+                addScore( 100, "*MEG*" );
+            } else {
+                addScore( 10, "" );
+	    }
             soundPlay( sound_hit );
             break; } 
 
@@ -118,6 +123,9 @@ static void switchCallback(int gpio, int level, uint32_t tick) {
                 j = 0;
                 soundPlay( sound_peter );
                 lampsBlink( blink_peter );
+                addScore( 100, "*PETER*" );
+            } else {
+                addScore( 10, "" );
             }
             soundPlay( sound_hit );
             break; } 
@@ -139,6 +147,9 @@ static void switchCallback(int gpio, int level, uint32_t tick) {
                 j = 0;
                 soundPlay( sound_chris );
                 lampsBlink( blink_chris );
+                addScore( 100, "*CHRIS*" );
+            } else {
+                addScore( 10, "" );
             }
             soundPlay( sound_hit );
             break; } 
@@ -160,6 +171,9 @@ static void switchCallback(int gpio, int level, uint32_t tick) {
                 j = 0;
                 soundPlay( sound_brian );
                 lampsBlink( blink_brian );
+                addScore( 100, "*BRIAN*" );
+            } else {
+                addScore( 10, "" );
             }
             soundPlay( sound_hit );
             break; } 

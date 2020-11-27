@@ -41,7 +41,7 @@ void displayInit(void) {
 
    displayCommand( "<font>", "font3x5" );
    displayCommand( "<brightness>", "0.3" );
-   displayCommand( "<text>", "VICTORY!" );
+   displayCommand( "<text>", " VICTORY SHALL BE MINE!" );
    displayCommand( "<scroll>", "start" );
 }
 
@@ -50,16 +50,23 @@ void displayDeInit(void) {
    zmq_ctx_destroy( context );
 }
 
+extern int score;
+
 static void displayCallback(void) {
    printf("displayCallback\n");
+   displayCommand( "<scroll>", "stop" );
    displayCommand( "<brightness>", "0.3" );
-   gpioCancelTimer( TIMER_DISPLAY ); 
+   char s[10] = {0,};
+   snprintf( s, sizeof(s)-1, "%d", score );
+   displayCommand( "<text>", s );
+   gpioCancelTimer( TIMER_DISPLAY );
 }
 
 void displayText(char *text) {
-   displayCommand( "<scroll>", "stop" );
+   displayCommand( "<scroll>", "start" );
    displayCommand( "<brightness>", "1.0" );
    displayCommand( "<text>", text );
-   gpioSetTimerFunc( TIMER_DISPLAY, 1000, displayCallback );
+   gpioSetTimerFunc( TIMER_DISPLAY, 500, displayCallback );
 }
+
 
