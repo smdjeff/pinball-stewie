@@ -3,6 +3,7 @@
 #include <string.h>
 #include <sys/time.h>
 #include <unistd.h>
+#include <limits.h>
 #include <czmq.h> // https://zeromq.org/
 #include "portable.h"
 
@@ -10,10 +11,6 @@
 
 void *context = NULL;
 void *requester = NULL;
-    
-static void *startDisplay(void *arg) {
-   system( "python display-server.py" );
-}
 
 static void displayCommand(char *cmd, char *data) {
    int sz = strlen(cmd) + strlen(data);
@@ -27,7 +24,6 @@ static void displayCommand(char *cmd, char *data) {
     
 void displayInit(void) {
    printf( "displayInit()\n" );
-   gpioStartThread( startDisplay, "" );
 
    printf( "connecting to i2c-display server...\n" );
    context = zmq_ctx_new();
@@ -39,7 +35,7 @@ void displayInit(void) {
       printf( "connect error:%d", err );
    }
 
-   displayCommand( "<font>", "font3x5" );
+   displayCommand( "<font>", "d3" );
    displayCommand( "<brightness>", "0.3" );
    displayCommand( "<text>", " VICTORY SHALL BE MINE!" );
    displayCommand( "<scroll>", "start" );
@@ -54,17 +50,19 @@ extern int score;
 
 static void displayCallback(void) {
    printf("displayCallback\n");
-   displayCommand( "<scroll>", "stop" );
    displayCommand( "<brightness>", "0.3" );
    char s[10] = {0,};
    snprintf( s, sizeof(s)-1, "%d", score );
+   displayCommand( "<font>", "d3" );
    displayCommand( "<text>", s );
    gpioCancelTimer( TIMER_DISPLAY );
 }
 
 void displayText(char *text) {
-   displayCommand( "<scroll>", "start" );
+   displayCommand( "<scroll>", "stop" );
+//   displayCommand( "<scroll>", "start" );
    displayCommand( "<brightness>", "1.0" );
+ //  displayCommand( "<font>", "hachicro" );
    displayCommand( "<text>", text );
    gpioSetTimerFunc( TIMER_DISPLAY, 500, displayCallback );
 }

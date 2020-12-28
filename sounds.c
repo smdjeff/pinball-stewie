@@ -3,6 +3,7 @@
 #include <string.h>
 #include <sys/time.h>
 #include <unistd.h>
+#include <limits.h>
 #include "portable.h"
 
 #include "sounds.h"
@@ -13,12 +14,18 @@ void soundInit(void) {
 }
 
 static void *playback(void *arg) {
-   char cmd[128] = {0,};
-   snprintf ( cmd, sizeof(cmd), "aplay \"sounds/%s.wav\" > /dev/null 2>&1", arg );
+   char cmd[256] = {0,};
+   char *path = ".\0";
+   char *sysPath = getenv("STEWIE_PATH");
+   if ( sysPath ) {
+      path = sysPath;
+   }
+   snprintf ( cmd, sizeof(cmd), "aplay \"%s/sounds/%s.wav\" > /dev/null 2>&1", path, arg );
    printf( "play:%s\n", arg );
-   //printf( "system:%s\n", cmd );
+   printf( "system:%s\n", cmd );
    system( cmd );
 }
+
 
 void soundPlay(sound_t sound) {
     //printf("soundPlay:%d\n", sound);
