@@ -92,7 +92,7 @@ void lampsBlink( blinks_t blink ) {
             break;
         case blink_shoot_again:
             gpioWrite( LAMP_SHOOT_AGAIN, LAMP_ON );
-            assert( gpioSetTimerFunc( TIMER_BLINK, 250, blinkCallback ) == 0 );
+            assert( gpioSetTimerFunc( TIMER_BLINK, 200, blinkCallback ) == 0 );
             break;
         case blink_brian:
         case blink_meg:

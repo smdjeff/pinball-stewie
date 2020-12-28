@@ -17,28 +17,22 @@ import fontd3
 scrollphathd.rotate(degrees=180)
 scrollphathd.set_font( fontd3 )
 font_width = fontd3.width
+timeout = 0
 
 print( 'starting display server' )
 context = zmq.Context()
 socket = context.socket(zmq.PULL)
 socket.bind('tcp://127.0.0.1:5555')
 
-scrolling = False
 while True:
     if socket.poll(10, zmq.POLLIN):
         msg = socket.recv(zmq.NOBLOCK)
-        print repr(msg)
-
-        if '<scroll>' in msg:
-            if 'stop' in msg:
-	        scrolling = False 
-            else:
-            	scrolling = True
+        #print repr(msg)
 
         if '<brightness>' in msg:
             msg = msg[ msg.find('>')+1 : ]
-    	    brightness = float( msg )
-            scrollphathd.set_brightness( brightness )
+    	    base_brightness = float( msg )
+            scrollphathd.set_brightness( base_brightness )
 
         if '<font>' in msg:
             font = msg[ msg.find('>')+1 : ]
@@ -64,12 +58,14 @@ while True:
 
         if '<text>' in msg:
             string = msg[ msg.find('>')+1 : ]
-            scrollphathd.clear()
             width = len(string) * font_width 
-    	    scrollphathd.write_string(string, y=0)
-	    scrollphathd.scroll_to(x=(17+width)/2, y=0)
+    	    scrollphathd.write_string( string, x=(17+width)/2, y=-7, brightness=1.0 )
+            scrollphathd.show()
+            timeout = time.time() + 2.0
 
-    if scrolling:
-        scrollphathd.scroll()
-    scrollphathd.show()
+    perc = timeout - time.time()
+    if perc > 0:
+        scrollphathd.set_brightness( base_brightness + (1.0*perc) )
+        scrollphathd.scroll( y=(-7.0*perc) )
+        scrollphathd.show()
 

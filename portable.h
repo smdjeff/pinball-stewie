@@ -44,7 +44,7 @@
 #define TIMER_BLINK         3
 #define TIMER_ATTRACT       4
 #define TIMER_SHOOTER       5
-#define TIMER_DISPLAY       6
+#define TIMER_6             6
 #define TIMER_7             7
 #define TIMER_8             8
 #define TIMER_9             9

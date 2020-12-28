@@ -9,6 +9,7 @@ void displayInit(void);
 void displayDeInit(void);
 
 void displayText(char *text);
+void displayScore(int score);
 
 #endif // _DISPLAY_H_
 

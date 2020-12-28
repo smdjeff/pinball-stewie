@@ -32,32 +32,31 @@ static void shooterOff(void) {
    gpioCancelTimer( TIMER_SHOOTER );
 }
 
-int score = 0;
-static void addScore( int points, char *text ) {
-   score += points;
-   if ( strlen(text) ) {
-      displayText( text );
-   }
-}
-
 static void switchCallback(int gpio, int level, uint32_t tick) {
     static bool brian_sw = false;
     static bool chris_sw = false;
+    static bool balls = 0;
     
     printf("switch %s %d\n", switchName(gpio), level);
+    
+    if ( balls == 0 ) {
+        if ( gpio == SWITCH_START ) {
+            if ( level == 0 ) {
+               balls = 5;
+               ledMatrixClear();
+               gpioCancelTimer( TIMER_ATTRACT );
+               soundPlay( sound_start );
+               gpioWrite( LAMP_PLAYFIELD, LAMP_ON );
+               displayScore( 0 );
+            }
+        }
+        return;
+    }
+    
     switch ( gpio ) {
             
        case SWITCH_START:
            if ( level == 0 ) {
-              static bool started = false;
-              if ( !started ) {
-                  started = true;
-                  ledMatrixClear();
-                  gpioCancelTimer( TIMER_ATTRACT );
-                  soundPlay( sound_start );
-                  gpioWrite( LAMP_PLAYFIELD, LAMP_ON );
-                  addScore( 0, "" );
-              }
               soundPlay( sound_launch );
               gpioWrite( SOLENOID_SHOOTER, 1 );
               gpioSetTimerFunc( TIMER_SHOOTER, 100, shooterOff );
@@ -67,9 +66,15 @@ static void switchCallback(int gpio, int level, uint32_t tick) {
         case SWITCH_SHOOTER:
             if ( level == 0 ) {
                 soundPlay( sound_drain );
-                lampsBlink( blink_shoot_again );
+                balls--;
+                if ( balls ) {
+                    lampsBlink( blink_shoot_again );
+                } else {
+                    lampsBlink( blink_none );
+                    gpioWrite( LAMP_PLAYFIELD, LAMP_OFF );
+                }
             } else {
-                lampsBlink( blink_none );
+                lampsBlink( blink_none );              
             }
             break;
             
@@ -85,9 +90,9 @@ static void switchCallback(int gpio, int level, uint32_t tick) {
                 j = 0;
                 soundPlay( sound_lois );
                 lampsBlink( blink_lois );
-                addScore( 100, "*LOIS*" );
+                displayScore( 100 );
             } else {
-            	addScore( 10, "" );
+            	displayScore( 10 );
             }
             soundPlay( sound_hit );
             break; }   
@@ -104,9 +109,9 @@ static void switchCallback(int gpio, int level, uint32_t tick) {
                 j = 0;
                 soundPlay( sound_meg );
                 lampsBlink( blink_meg );
-                addScore( 100, "*MEG*" );
+                displayScore( 100 );
             } else {
-                addScore( 10, "" );
+                displayScore( 10 );
 	    }
             soundPlay( sound_hit );
             break; } 
@@ -123,9 +128,9 @@ static void switchCallback(int gpio, int level, uint32_t tick) {
                 j = 0;
                 soundPlay( sound_peter );
                 lampsBlink( blink_peter );
-                addScore( 100, "*PETER*" );
+                displayScore( 100 );
             } else {
-                addScore( 10, "" );
+                displayScore( 10 );
             }
             soundPlay( sound_hit );
             break; } 
@@ -147,9 +152,9 @@ static void switchCallback(int gpio, int level, uint32_t tick) {
                 j = 0;
                 soundPlay( sound_chris );
                 lampsBlink( blink_chris );
-                addScore( 100, "*CHRIS*" );
+                displayScore( 100 );
             } else {
-                addScore( 10, "" );
+                displayScore( 10 );
             }
             soundPlay( sound_hit );
             break; } 
@@ -171,9 +176,9 @@ static void switchCallback(int gpio, int level, uint32_t tick) {
                 j = 0;
                 soundPlay( sound_brian );
                 lampsBlink( blink_brian );
-                addScore( 100, "*BRIAN*" );
+                displayScore( 100 );
             } else {
-                addScore( 10, "" );
+                displayScore( 10 );
             }
             soundPlay( sound_hit );
             break; } 
@@ -198,7 +203,7 @@ void switchesInit(void) {
         gpioGlitchFilter( gpio, 250 );
         gpioSetAlertFunc( gpio, switchCallback );
     }
-    gpioGlitchFilter( SWITCH_SHOOTER, 1000 );
+    gpioGlitchFilter( SWITCH_SHOOTER, 2000 );
     gpioSetMode( SWITCH_DRIVE_SIGNAL, PI_OUTPUT );
     gpioWrite( SWITCH_DRIVE_SIGNAL, 0 );
 }
