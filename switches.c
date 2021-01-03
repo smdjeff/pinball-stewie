@@ -8,9 +8,11 @@
 #include "stewie-lamps.h"
 #include "lamps.h"
 #include "sounds.h"
+#include "game.h"
 #include "display.h"
 
 #include "switches.h"
+
 
 static char* switchName(int gpio) {
    switch( gpio ) {
@@ -35,43 +37,46 @@ static void shooterOff(void) {
 static void switchCallback(int gpio, int level, uint32_t tick) {
     static bool brian_sw = false;
     static bool chris_sw = false;
-    static bool balls = 0;
+    static int balls = 0;
     
     printf("switch %s %d\n", switchName(gpio), level);
     
-    if ( balls == 0 ) {
+    if ( balls <= 0 ) {
         if ( gpio == SWITCH_START ) {
             if ( level == 0 ) {
-               balls = 5;
-               ledMatrixClear();
-               gpioCancelTimer( TIMER_ATTRACT );
-               soundPlay( sound_start );
-               gpioWrite( LAMP_PLAYFIELD, LAMP_ON );
-               displayScore( 0 );
+                balls = 5;
+                printf("balls:%d\n", balls);
+                soundPlay( sound_start );
+                gameStart();
             }
         }
-        return;
     }
     
     switch ( gpio ) {
             
        case SWITCH_START:
            if ( level == 0 ) {
-              soundPlay( sound_launch );
-              gpioWrite( SOLENOID_SHOOTER, 1 );
-              gpioSetTimerFunc( TIMER_SHOOTER, 100, shooterOff );
+              if ( gpioRead( SWITCH_SHOOTER ) == 0 ) {
+                 soundPlay( sound_launch );
+                 gpioWrite( SOLENOID_SHOOTER, 1 );
+                 gpioSetTimerFunc( TIMER_SHOOTER, 100, shooterOff );
+              }
            }
            break;
             
         case SWITCH_SHOOTER:
             if ( level == 0 ) {
-                soundPlay( sound_drain );
                 balls--;
-                if ( balls ) {
+                printf("balls:%d\n", balls);
+                if ( balls > 0 ) {
                     lampsBlink( blink_shoot_again );
+                    soundPlay( sound_drain );
+                    displayBall( balls );
                 } else {
                     lampsBlink( blink_none );
-                    gpioWrite( LAMP_PLAYFIELD, LAMP_OFF );
+                    gameStop();
+                    soundPlay( sound_game_over );
+                    displayText( "Damn" );
                 }
             } else {
                 lampsBlink( blink_none );              

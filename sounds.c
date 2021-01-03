@@ -4,61 +4,149 @@
 #include <sys/time.h>
 #include <unistd.h>
 #include <limits.h>
+#include <assert.h>
+#include <signal.h>
+#include "popen_pid.h"
+#include "game.h"
 #include "portable.h"
 
 #include "sounds.h"
 
-    
-void soundInit(void) {
-    printf("soundInit()\n");
-}
 
-static void *playback(void *arg) {
-   char cmd[256] = {0,};
-   char *path = ".\0";
-   char *sysPath = getenv("STEWIE_PATH");
-   if ( sysPath ) {
-      path = sysPath;
+typedef struct {
+    int pid;
+    FILE* stream;
+    pthread_t* thread; 
+    const char* file;
+    bool loop;
+} qe_t;
+
+static qe_t queue[ 6 ] = {0, };
+static bool music_enabled = true;
+
+static void deQueue( int pid );
+static void enQueue( const char* file, bool loop );
+static bool fullQueue( void );
+
+static void* startPlayback( void *arg ) {
+   qe_t* e = arg;
+   char *cmd = "aplay";
+   char file[256] = {0,};
+   char *path = getenv( "STEWIE_PATH" );
+   if ( !path ) {
+      path = ".";
    }
-   snprintf ( cmd, sizeof(cmd), "aplay \"%s/sounds/%s.wav\" > /dev/null 2>&1", path, arg );
-   printf( "play:%s\n", arg );
-   printf( "system:%s\n", cmd );
-   system( cmd );
+   snprintf( file, sizeof(file)-1, "%s/sounds/%s.wav", path, e->file );
+   char *argv[4] = {cmd, "-q", file, NULL};
+   do {
+       printf( "play:%s\n", e->file );
+       e->stream = popen_pid( cmd, argv, 'w', &(e->pid) );
+       assert( e->stream );
+       assert( e->pid );
+       printf( "waiting:%d\n", e->pid );
+       pclose_pid( e->stream, e->pid ); // waits
+   } while ( e->loop );
+   printf( "done:%d\n", e->pid );
+   memset( e, 0x00, sizeof(qe_t) );
+   return NULL;
 }
 
+static void deQueue( int pid ) {
+    for (int i=0; i<sizeof(queue)/sizeof(queue[0]); i++) {
+        qe_t* e = &queue[ i ];
+        if ( e->pid == pid ) {
+            memset( e, 0x00, sizeof(qe_t) );
+            return;
+        }
+    }
+    printf("dequeue failed %d\n", pid);
+}
+
+static void enQueue( const char* file, bool loop ) {
+    for (int i=0; i<sizeof(queue)/sizeof(queue[0]); i++) {
+        qe_t* e = &queue[ i ];
+        if ( e->pid == 0 ) {
+            static int pid = 1;
+            e->pid = pid++;
+            e->file = file;
+            e->loop = loop;
+            e->thread = gpioStartThread( startPlayback, e );
+            return;
+        }
+    }
+    printf("enqueue failed %s\n", file);
+}
+
+static bool fullQueue( void ) {
+    for (int i=0; i<sizeof(queue)/sizeof(queue[0]); i++) {
+        qe_t* e = &queue[ i ];
+        if ( e->pid == 0 ) {
+            return false;   
+        }
+    }
+    return true;
+}
+
+void soundInit(void) {
+    printf("soundInit\n");
+    soundStopAll();
+}
+
+void soundEnableMusic(bool enable) {
+    music_enabled = enable;
+}  
+
+void soundStopAll(void) {
+    printf("soundStopAll\n");
+    for (int i=0; i<sizeof(queue)/sizeof(queue[0]); i++) {
+        qe_t* e = &queue[ i ];
+        if ( e->pid ) {
+            printf( "killing:%d\n", e->pid );
+            kill( e->pid, SIGINT );
+ //           pclose_pid( e->stream, e->pid );
+ //           gpioStopThread( e->thread );
+        }
+    }
+    memset( queue, 0x00, sizeof(queue) );
+}
+
+static void soundPlayFile(const char *file, bool loop) {
+    if ( !fullQueue() ) {
+        enQueue( file, loop );
+    }
+}
 
 void soundPlay(sound_t sound) {
-    //printf("soundPlay:%d\n", sound);
-    
     switch( sound ) {
+        case sound_boot: {
+            static const char* s = "Small playfield intro";
+            soundPlayFile( s, false );
+            break; }
+
         case sound_start: {
-            char* s0[]= {
+            static const char* s[]= {
                 "Main theme music",
                 "Timed event music",
                 "Chris theme music",
             };
-//            gpioStartThread(playback, s0[rand()/(RAND_MAX / 3 + 1)]);
-            char* s1[]= {
-                "Stewie is going to kick your ass",
-                "Small playfield intro",
-                "Multiball start",
-            };
-//            gpioStartThread(playback, s1[rand()/(RAND_MAX / 3 + 1)]);
+            if ( music_enabled ) {
+                soundPlayFile( s[rand()/(RAND_MAX / 3 + 1)], true );
+            }
             break; }
         
         case sound_launch: {
-            char* s[] = {
+            static const char* s[] = {
                 "Launch 1",
                 "Launch 2",
                 "Launch 3",
                 "Launch 4",
                 "Launch 5"
             };
-            gpioStartThread(playback, s[rand()/(RAND_MAX / 5 + 1)]);
+            soundPlayFile( s[rand()/(RAND_MAX / 5 + 1)], false );
             break; }
             
         case sound_hit: {
-            char* s[] = {
+            static const char* s[] = {
                 "Hit 1",
                 "Hit 2 (fart)",
                 "Hit 3",
@@ -71,78 +159,71 @@ void soundPlay(sound_t sound) {
                 "Hit 10",
                 "Hit 11"
             };
-            gpioStartThread(playback, s[rand()/(RAND_MAX / 10 + 1)]);
+            soundPlayFile( s[rand()/(RAND_MAX / 10 + 1)], false );
             break; }
             
         case sound_game_over: {
-            char* s[]= {
+            static const char* s[]= {
                 "Stewie says game over man",
                 "Stewie will not tolerate failure"
             };
-            gpioStartThread(playback, s[rand()/(RAND_MAX / 2 + 1)]);
+            soundPlayFile( s[rand()/(RAND_MAX / 2 + 1)], false );
             break; }
             
         case sound_drain: {
-            char* s0[] = {
+            static const char* s[] = {
                 "Drain music 1",
                 "Drain music 2",
                 "Drain music 3",
                 "Drain music 4",
                 "Drain music 5",
             };
-            char* s1[] = {
-                "Stewie says damn you vile woman",
-                "Stewie says one down",
-                "Stewie says what the deuce was that",
-                "Stewie says you're doin' good"
-            };
-            gpioStartThread(playback, s0[rand()/(RAND_MAX / 5 + 1)]);
-            //gpioStartThread(playback, s1[rand()/(RAND_MAX / 4 + 1)]);
+            soundPlayFile( s[rand()/(RAND_MAX / 5 + 1)], false );
             break; }
 
         case sound_brian: {
-            char* s[]= {
+            static const char* s[]= {
                 "Brian asks if anyone wants a mojito",
                 "Brian says good good so far",
                 "Brian says wow",
             };
-            gpioStartThread(playback, s[rand()/(RAND_MAX / 3 + 1)]);
+            soundPlayFile( s[rand()/(RAND_MAX / 3 + 1)], false );
             break; }
 
         case sound_meg: {
-            char* s[]= {
+            static const char* s[]= {
                 "Meg cries",
                 "Meg hates everyone",
                 "Meg wants Lois to do something"
             };
-            gpioStartThread(playback, s[rand()/(RAND_MAX / 3 + 1)]);
+            soundPlayFile( s[rand()/(RAND_MAX / 3 + 1)], false );
             break; }
 
         case sound_peter: {
-            char* s[]= {
+            static const char* s[]= {
                 "Peter giggles",
                 "Peter has an idea",
                 "Peter says that was awesome",
                 "Peter says you bastard"
             };
-            gpioStartThread(playback, s[rand()/(RAND_MAX / 4 + 1)]);
+            soundPlayFile( s[rand()/(RAND_MAX / 4 + 1)], false );
             break; }
 
         case sound_lois: {
-            char* s[]= {
+            static const char* s[]= {
                 "Lois advises Meg",
                 "Lois isn't wearing any panties",
                 "Lois says what on earth was that"
             };
-            gpioStartThread(playback, s[rand()/(RAND_MAX / 3 + 1)]);
+            soundPlayFile( s[rand()/(RAND_MAX / 3 + 1)], false );
             break; }
 
         case sound_chris: {
-            char* s[]= {
+            static const char* s[]= {
                 "Chris isn't supposed to mention poo",
                 "Someone peed in Chris' pants"
             };
-            gpioStartThread(playback, s[rand()/(RAND_MAX / 2 + 1)]);
+            soundPlayFile( s[rand()/(RAND_MAX / 2 + 1)], false );
             break; }
     }
 }

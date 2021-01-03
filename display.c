@@ -45,6 +45,10 @@ void displayDeInit(void) {
    zmq_ctx_destroy( context );
 }
 
+void displayText(char *text) {
+   displayCommand( "<text>", text );
+}
+
 void displayScore(int score) {
    static int total = 0;
    if ( score ) {
@@ -57,8 +61,11 @@ void displayScore(int score) {
    displayCommand( "<text>", s );
 }
 
-void displayText(char *text) {
-   displayCommand( "<text>", text );
+void displayBall(int ball) {
+   char s[10] = {0,};
+   snprintf( s, sizeof(s)-1, "%d", ball );
+   displayCommand( "<ball>", s );
 }
+
 
 

@@ -68,20 +68,19 @@ void flippersInit(void) {
     gpioGlitchFilter( SWITCH_FLIPPER_RIGHT, 250 );
 }
 
-void flippersEnable(void) {
-    printf("flippersEnable()\n");
-    gpioSetAlertFunc( SWITCH_FLIPPER_RIGHT, switchRightCallback );
-    gpioSetAlertFunc( SWITCH_FLIPPER_LEFT, switchLeftCallback );
-}
-
-void flippersDisable(void) {
-    printf("flippersDisable()\n");
-    gpioSetAlertFunc( SWITCH_FLIPPER_RIGHT, NULL );
-    gpioSetAlertFunc( SWITCH_FLIPPER_LEFT, NULL );
-    gpioCancelTimer( TIMER_LEFT_FLIP );
-    gpioCancelTimer( TIMER_RIGHT_FLIP );
-    gpioWrite( SOLENOID_FLIPPER_LEFT, SOLENOID_OFF );
-    gpioWrite( SOLENOID_FLIPPER_RIGHT,SOLENOID_OFF );    
+void flippersEnable(bool enable) {
+    printf("flippersEnable(%d)\n",enable);
+    if ( enable ) {
+        gpioSetAlertFunc( SWITCH_FLIPPER_RIGHT, switchRightCallback );
+        gpioSetAlertFunc( SWITCH_FLIPPER_LEFT, switchLeftCallback );
+    } else {
+        gpioSetAlertFunc( SWITCH_FLIPPER_RIGHT, NULL );
+        gpioSetAlertFunc( SWITCH_FLIPPER_LEFT, NULL );
+        gpioCancelTimer( TIMER_LEFT_FLIP );
+        gpioCancelTimer( TIMER_RIGHT_FLIP );
+        gpioWrite( SOLENOID_FLIPPER_LEFT, SOLENOID_OFF );
+        gpioWrite( SOLENOID_FLIPPER_RIGHT,SOLENOID_OFF );
+    }
 }
 
 

@@ -7,8 +7,7 @@
 
 void flippersInit(void);
 
-void flippersEnable(void);
-void flippersDisable(void);
+void flippersEnable(bool enable);
 
 #endif // _FLIPPERS_H_
 

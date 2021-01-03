@@ -10,6 +10,7 @@ void displayDeInit(void);
 
 void displayText(char *text);
 void displayScore(int score);
+void displayBall(int ball);
 
 #endif // _DISPLAY_H_
 

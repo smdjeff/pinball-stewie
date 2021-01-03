@@ -6,6 +6,7 @@
 #include <stdbool.h>
 
 typedef enum {
+    sound_boot,
     sound_start,
     sound_launch,
     sound_hit,
@@ -19,8 +20,9 @@ typedef enum {
 } sound_t;
     
 void soundInit(void);
-
+void soundEnableMusic(bool enable);
 void soundPlay(sound_t sound);
+void soundStopAll(void);
 
 #endif // _SOUNDS_H_
 
