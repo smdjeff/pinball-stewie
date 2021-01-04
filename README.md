@@ -4,7 +4,9 @@ Stewie mini pinball machine as a WiFi connected stand-alone desktop toy.
 https://sternpinball.com/game/family-guy/
 
 https://youtu.be/Mf2ijYRtEzU
+
 https://youtu.be/dwQbJAziybQ 
+
 https://youtu.be/de2w1HFm3PM
 
 <p float="left">
