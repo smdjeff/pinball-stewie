@@ -80,31 +80,56 @@ make
 sudo make install
 
 # install scroll-phat-hd
-curl https://get.pimoroni.com/scrollphathd | bash
-#pip install scrollphathd #too slow!
-#sudo apt install python3-scrollphathd
-sudo apt install python-scrollphathd
-
+'''
+git clone https://github.com/pimoroni/scroll-phat-hd.git
+cd scroll-phat-hd/library
+sudo python setup.py install
+'''
+  
 # install PhatDAC
 curl -sS https://raw.githubusercontent.com/adafruit/Raspberry-Pi-Installer-Scripts/master/i2samp.sh | bash
 
-# ZeroMQ RPC
+# ZeroMQ RPC (python side)
 sudo apt-get -y install libzmq3-dev
 pip install pyzmq
+# C side ref: https://github.com/zeromq/czmq#building-on-linux-and-macos
+
+'''
+cd ~
+git clone git://github.com/zeromq/czmq.git
+cd czmq
+./autogen.sh && ./configure && make check
+sudo make install
+sudo ldconfig
+cd ..
+'''
 
 # install stewie
 sudo apt-get -y install git
 mkdir git && cd git
 git clone https://github.com/smdjeff/stewie-pinball
 
+# startup scripts
+
+sudo nano /etc/rc.local 
+'''
+iwconfig wlan0 power off # disable power savings modes
+bash /home/pi/startup.sh &
+'''
+
+cp ~/git/startup.sh ~
 pico /home/pi/startup.sh
+'''
 export STEWIE_PATH=/home/pi/git/stewie-pinball
 $STEWIE_PATH/display-server.py &
 sleep 1 && $STEWIE_PATH/stewie &
 exit 0
+'''
 
-sudo nano /etc/rc.local 
-add line...
-sudo bash /home/pi/startup.sh &
-
+# user login script
+sudo .bash_profile
+'''
+./termsize
+sudo wpa_cli -i wlan0 reconfigure
+'''
 
