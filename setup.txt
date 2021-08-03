@@ -1,34 +1,130 @@
+################################################
+# make card
+################################################
+
 download and install headless(no desktop) pi os image to sd card
 https://www.raspberrypi.org/software/
 
-##################
-# get serial console working
-##################
 
-#install usb serial driver
+################################################
+# modify card and enable serial console 
+################################################
+
+#install usb serial driver (mac side)
 http://www.prolific.com.tw/US/ShowProduct.aspx?p_id=229&pcid=41
 
-#enable serial console
-mount card and enable serial console!
-edit /boot/config.txt add... 
+# mount card
+# edit /boot/config.txt add... 
 	dtoverlay=dwc2
 	enable_uart=1
 
-edit /boot/cmdline.txt add...
+# edit /boot/cmdline.txt add...
 	modules-load=dwc2,g_serial
 
-create a symlink
+# create a symlink
 cd /Volumes/rootfs/etc/systemd/system/getty.target.wants
 ln -s /lib/systemd/system/getty@.service getty@ttyGS0.service
 
+# usage & quit = Ctrl-A Ctrl-D
 screen /dev/tty.usbmodem14101 115200,cs8
-quit = Ctrl-A Ctrl-D
 
-##################
-#speed ups...
-##################
 
-#console - disable bluetooth 
+################################################
+# install stewie sources
+################################################
+
+sudo apt-get -y install git
+mkdir git && cd git
+git clone https://github.com/smdjeff/stewie-pinball
+make
+chmod +x ./stewie
+
+mkdir sounds; cd sounds
+gdown.pl https://drive.google.com/file/d/1Z2kLpOeDKzqBpQP47zslXBqrTpA0zDV_
+gdown.pl https://drive.google.com/file/d/1S2_zKztEICtA-cRrjxmtiKpKuOaNHaBl
+unzip gdown*
+
+################################################
+# installs
+################################################
+
+# wifi setup
+sudo raspi-config
+
+# pigpio
+sudo apt install python-setuptools python3-setuptools
+wget https://github.com/joan2937/pigpio/archive/master.zip
+unzip master.zip
+cd pigpio-master
+make
+sudo make install
+
+# install scroll-phat-hd (via source, not old apt-get package)
+'''
+git clone https://github.com/pimoroni/scroll-phat-hd.git
+cd scroll-phat-hd/library
+sudo python setup.py install
+'''
+  
+# install PhatDAC
+curl -sS https://raw.githubusercontent.com/adafruit/Raspberry-Pi-Installer-Scripts/master/i2samp.sh | bash
+
+# ZeroMQ RPC (python side)
+sudo apt-get -y install libzmq3-dev
+pip install pyzmq
+
+# ZeroMQ RPC (C side)
+# C side ref: https://github.com/zeromq/czmq#building-on-linux-and-macos
+# note: only need czmq, not big libzmq
+'''
+cd ~
+git clone git://github.com/zeromq/czmq.git
+cd czmq
+./autogen.sh && ./configure && make check
+sudo make install
+sudo ldconfig
+cd ..
+'''
+
+################################################
+# setup autostart 
+################################################
+
+# box start script (may start prior to required services)
+nano /etc/rc.local
+'''
+iwconfig wlan0 power off # disable problematic wifi power savings features
+'''
+
+# user login script (runs on login only)
+wget https://raw.githubusercontent.com/akkana/scripts/master/termsize .
+chmod +x termsize
+nano ~/.bash_profile
+'''
+./termsize
+sudo ip link set wlan0 up
+#sudo wpa_cli -i wlan0 reconfigure
+sudo systemctl daemon-reload
+sudo systemctl restart dhcpcd
+'''
+
+# systemd service (which calls startup.sh)
+cd ~/git/stewie-pinball
+sudo cp ./stewie.service /lib/systemd/system/stewie.service
+sudo cp ./stewie.service /lib/systemd/system/stewie-display.service
+sudo chmod 644 /lib/systemd/system/stewie*
+sudo systemctl daemon-reload
+sudo systemctl enable stewie.service
+sudo systemctl enable stewie-display.service
+sudo reboot
+
+
+################################################
+# speedups
+################################################
+
+sudo apt purge avahi*
+
 sudo systemctl disable hciuart.service
 sudo systemctl disable bluealsa.service
 sudo systemctl disable bluetooth.service
@@ -46,11 +142,12 @@ sudo systemctl disable apt-daily.service
 sudo systemctl disable avahi-daemon.service
 sudo systemctl disable triggerhappy.service
 
+sudo nano /boot/cmdline.txt
+# add quiet before rootwait
 
-###### sudo nano /boot/cmdline.txt
-add quiet before rootwait
+sudo nano /boot/config.txt
 
-###### sudo vi /boot/config.txt
+'''
 # Set the bootloader delay
 boot_delay=0
 
@@ -62,74 +159,6 @@ dtoverlay=disable-bt
 
 # Put Stewie's FETs in input mode to avoid firing during boot
 gpio=4,5,17,22,27=ip
-
-
-##################
-#setup (on running box)
-##################
-
-sudo raspi-config
-- set wifi
-
-# install pigpio
-sudo apt install python-setuptools python3-setuptools
-wget https://github.com/joan2937/pigpio/archive/master.zip
-unzip master.zip
-cd pigpio-master
-make
-sudo make install
-
-# install scroll-phat-hd
-'''
-git clone https://github.com/pimoroni/scroll-phat-hd.git
-cd scroll-phat-hd/library
-sudo python setup.py install
-'''
-  
-# install PhatDAC
-curl -sS https://raw.githubusercontent.com/adafruit/Raspberry-Pi-Installer-Scripts/master/i2samp.sh | bash
-
-# ZeroMQ RPC (python side)
-sudo apt-get -y install libzmq3-dev
-pip install pyzmq
-# C side ref: https://github.com/zeromq/czmq#building-on-linux-and-macos
-
-'''
-cd ~
-git clone git://github.com/zeromq/czmq.git
-cd czmq
-./autogen.sh && ./configure && make check
-sudo make install
-sudo ldconfig
-cd ..
 '''
 
-# install stewie
-sudo apt-get -y install git
-mkdir git && cd git
-git clone https://github.com/smdjeff/stewie-pinball
-
-# startup scripts
-
-sudo nano /etc/rc.local 
-'''
-iwconfig wlan0 power off # disable power savings modes
-bash /home/pi/startup.sh &
-'''
-
-cp ~/git/startup.sh ~
-pico /home/pi/startup.sh
-'''
-export STEWIE_PATH=/home/pi/git/stewie-pinball
-$STEWIE_PATH/display-server.py &
-sleep 1 && $STEWIE_PATH/stewie &
-exit 0
-'''
-
-# user login script
-sudo .bash_profile
-'''
-./termsize
-sudo wpa_cli -i wlan0 reconfigure
-'''
 

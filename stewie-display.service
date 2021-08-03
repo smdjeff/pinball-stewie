@@ -1,0 +1,17 @@
+[Unit]
+Description=Stewie Pinball Service
+After=syslog.target multi-user.target
+
+[Service]
+Type=simple
+User=root
+Group=root
+ExecStart=/usr/bin/python /home/pi/git/stewie-pinball/display-server.py
+Restart=always
+RestartSec=3
+KillMode=process
+
+[Install]
+WantedBy=multi-user.target
+
+
