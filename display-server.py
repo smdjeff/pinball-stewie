@@ -9,10 +9,10 @@ from scrollphathd.fonts import font3x5
 from scrollphathd.fonts import font5x5
 from scrollphathd.fonts import font5x7
 from scrollphathd.fonts import font5x7smoothed
-import fontorgan
-import fonthachicro
-import fontgauntlet
-import fontd3
+from scrollphathd.fonts import fontorgan
+from scrollphathd.fonts import fonthachicro
+from scrollphathd.fonts import fontgauntlet
+from scrollphathd.fonts import fontd3
 import fontmonkey
 import fontball
 
@@ -87,7 +87,7 @@ while True:
            scrollphathd.write_string( chr(ord('0')+ball_i), x=1, y=0, brightness=1.0 )           
         b = base_brightness + ((1.0-base_brightness)*perc);
         y = 8.0*perc 
-        print "%0.2f %0.2f %0.2f" % (perc,b,y)
+        #print "%0.2f %0.2f %0.2f" % (perc,b,y)
         scrollphathd.set_brightness( b )
         #scrollphathd.scroll_to( x=0, y=int(y) )
         #scrollphathd.fill(0,0,17,1)

@@ -85,4 +85,3 @@ data = {
 }
 width = 17
 height = 7
-
