@@ -47,7 +47,7 @@ https://youtu.be/de2w1HFm3PM
 |   17 | spi1_ce1    | fet solenoid flipper right |
 |   18 | spi1_ce0    | |
 |   19 | pmc_fs      | audio bonnet pcm fs |
-|   20 | spi1_mosi   | |
+|   20 | pmc_din     | |
 |   21 | pmc_dout    | audio bonnet pcm dout |
 |   22 | sdio_clk    | fet lamp playfield gi |
 |   23 | sdio_cmd    | switch lois |
