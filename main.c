@@ -20,7 +20,7 @@
 volatile bool killed = false;
 static void intHandler(int sig) {
     printf("intHandler:%d\n",sig);
-    //signal(sig, SIG_IGN);
+//    signal(sig, SIG_IGN);
     killed = true;
 }
 
@@ -45,9 +45,10 @@ int main(int argc, char *argv[]) {
     srand( time(0) );
 
     //// run
-//    signal(SIGINT, intHandler);
+    signal(SIGINT, intHandler);
     while ( !killed ) {
-        usleep(1000);
+        usleep(100 *1000);
+        fflush(stdout);
     }
 
     //// stop

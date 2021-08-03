@@ -37,10 +37,10 @@ static void* startPlayback( void *arg ) {
       path = ".";
    }
    snprintf( file, sizeof(file)-1, "%s/sounds/%s.wav", path, e->file );
-   char *argv[4] = {cmd, "-q", file, NULL};
+   char *args[] = {cmd, "-q", file, NULL};
    do {
        printf( "play:%s\n", e->file );
-       e->stream = popen_pid( cmd, argv, 'w', &(e->pid) );
+       e->stream = popen_pid( args, 'w', &(e->pid) );
        assert( e->stream );
        assert( e->pid );
        printf( "waiting:%d\n", e->pid );
