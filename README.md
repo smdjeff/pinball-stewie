@@ -15,6 +15,13 @@ https://youtu.be/de2w1HFm3PM
 </tr>
 <tr><td><img src="docs/PXL_20210104_172726868.jpg"></td></tr>
 </table>
+
+## Hardware
+* Raspberry [Pi Zero W](https://www.raspberrypi.org/products/raspberry-pi-zero-w/)
+* I2C MCP23017 [Adafruit GPIO Expander](https://learn.adafruit.com/gpio-expander-bonnet)
+* I2C 17x7 LED matrix with PWM IS31FL3731 [PiMoroni ScrollPhatHD](https://shop.pimoroni.com/products/scroll-phat-hd)
+* I2C 3W PCM DAC MAX98357 [Adafruit Stereo Speaker Bonnet](https://www.adafruit.com/product/3346)
+* Solenoid and lamp MOSFETs [IRLB8721](https://cdn-shop.adafruit.com/datasheets/irlb8721pbf.pdf)
  
 ## Game operation
 There are only 5 shots and each shot has a corresponding switch. The Peter and Brian shots share a loop so the sequence of the two opto switches triggering determines which shot is taken. Besides these switches, the only other input to game play is time. Outputs include all 22 playfield lamps and the LED display.
