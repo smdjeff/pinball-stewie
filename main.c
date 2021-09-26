@@ -3,7 +3,6 @@
 #include <string.h>
 #include <signal.h>
 #include <sys/time.h>
-#include <sys/random.h>
 #include <assert.h>
 #include <unistd.h>
 #include "portable.h"
@@ -40,8 +39,8 @@ int main(int argc, char *argv[]) {
     soundInit();
     gameInit();
 
-    unsigned int seed;
-    getrandom( &seed, sizeof(seed), 0 );
+    // unsigned int seed;
+    // getrandom( &seed, sizeof(seed), 0 );
     srand( time(0) );
 
     //// run

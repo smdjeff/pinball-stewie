@@ -6,7 +6,7 @@
 #include <assert.h>
 #include "portable.h"
     
-#include "mcp23017.h"    
+//#include "mcp23017.h"    
 
 
 // based on studying the schematic of the led matrix hardware shift registers
@@ -59,9 +59,9 @@ void ledMatrixChris(int value) {
 }
 
 static void writeRow(uint8_t b) {
-  gpioWrite( LED_MATRIX_CLK, 0 );
-  mcp23017Output( b );
-  gpioWrite( LED_MATRIX_CLK, 1 );
+  // gpioWrite( LED_MATRIX_CLK, 0 );
+  // mcp23017Output( b );
+  // gpioWrite( LED_MATRIX_CLK, 1 );
 }
 
 static void matrixRefresh(void) {
@@ -98,11 +98,11 @@ void ledMatrixClear(void) {
 }
 
 void ledMatrixInit(void) {
-  printf("ledMatrixInit()\n");
-  gpioSetMode( LED_MATRIX_CLK, PI_OUTPUT );
-  mcp23017Init();
-  writeRow( 0x80 ); // blank all lamps
-  assert( gpioSetTimerFunc( TIMER_MATRIX, 10, matrixRefresh ) == 0);
+   printf("ledMatrixInit()\n");
+//   gpioSetMode( LED_MATRIX_CLK, PI_OUTPUT );
+// //  mcp23017Init();
+//   writeRow( 0x80 ); // blank all lamps
+//   assert( gpioSetTimerFunc( TIMER_MATRIX, 10, matrixRefresh ) == 0);
 }
 
 
