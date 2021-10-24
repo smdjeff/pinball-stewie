@@ -38,31 +38,44 @@ int gpioInitialise(void) {
     return 0; 
 }
 
-int gpioSetMode(unsigned gpio, unsigned mode) { 
-    gpio_init( gpio );
-    gpio_set_dir( gpio, mode );
-    return 0; 
+typedef struct {
+    repeating_timer_t timer;
+    gpioTimerFunc_t callback;
+    bool fire;
+} dsrTimer_t;
+static dsrTimer_t dsrTimers[10] = {0,};
+
+static bool repeating_timer_callback(repeating_timer_t *rt) {
+    // linux driver style, make calls from a deferred service routine
+    // allowing useful work to be performed within the callback
+    assert( rt );
+    dsrTimer_t *t = rt->user_data;
+    t->fire = true;
+    return true; // reschedule
 }
 
-static struct repeating_timer timers[10] = {0,};
-
-static bool repeating_timer_callback(struct repeating_timer *t) {
-    // extra call accounts for differing callback prototype
-    assert( t );
-    gpioTimerFunc_t f = t->user_data;
-    assert( f );
-    f( );
-    return true;
+void deferredTimers(void) {
+  for (int i=0; i<sizeof(dsrTimers)/sizeof(dsrTimers[0]); i++) {
+    dsrTimer_t *t = &dsrTimers[i];
+    if ( t->callback && t->fire ) {
+      t->fire = false;
+      t->callback();
+    }
+  }
 }
 
-int gpioSetTimerFunc(unsigned timer, unsigned millis, gpioTimerFunc_t f) {
+int gpioSetTimerFunc(unsigned id, unsigned millis, gpioTimerFunc_t f) {
     bool success = false;
-    assert( timer < sizeof(timers)/sizeof(timers[0]) );
+    assert( id < sizeof(dsrTimers)/sizeof(dsrTimers[0]) );
+    dsrTimer_t *dt = &dsrTimers[id];
+    repeating_timer_t *t = &(dt->timer);
     if ( millis ) {
-      success = add_repeating_timer_ms( millis, repeating_timer_callback, f/*userdata*/, &timers[timer] );
-      printf("add_repeating_timer_ms:%d %d\n", success, timers->alarm_id);
+      dt->callback = f;
+      success = add_repeating_timer_ms( millis, repeating_timer_callback, dt/*userdata*/, t );
+      printf("add_repeating_timer_ms:%d %d %d %d %p\n", success, id, millis, t->alarm_id, dt->callback);
     } else {
-      success = cancel_repeating_timer( &timers[timer] );
+      printf("cancel_repeating_timer:%d %d\n", id, t->alarm_id);
+      success = cancel_repeating_timer( t );
     }
     return (success == true)? 0 : 1; // error = 0 == success
 }
@@ -132,6 +145,12 @@ int gpioGlitchFilter(unsigned gpio, unsigned steady) {
 
 void* gpioStartThread(gpioThreadFunc_t f, void *userdata) {
     return 0;
+}
+
+int gpioSetMode(unsigned gpio, unsigned mode) { 
+    gpio_init( gpio );
+    gpio_set_dir( gpio, mode );
+    return 0; 
 }
 
 int gpioWrite(unsigned gpio, unsigned level) {

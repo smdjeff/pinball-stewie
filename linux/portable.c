@@ -7,7 +7,7 @@
 #include <pthread.h>
 
 #include "portable.h"
-    
+
 
 int gpioInitialise(void) { 
     printf("gpioInitialise\n"); return 0;

@@ -36,6 +36,7 @@
 
 // https://github.com/joan2937/pigpio/issues/397
 #define gpioCancelTimer(t) gpioSetTimerFunc(t,PI_MIN_MS,0)
+#define deferredTimers()    do {} while(0)
 
 #define TIMER_LEFT_FLIP     0
 #define TIMER_RIGHT_FLIP    1
@@ -66,7 +67,6 @@
     // we're using the real PiGpio C library
     #include <pigpio.h> // http://abyz.me.uk/rpi/pigpio/
 
-
 #else 
 
     // we're using a local compliant glue layer
@@ -76,6 +76,9 @@
 
         #include "pico/stdlib.h" // defs RASPBERRYPI_PICO
         void haltPico(void);
+
+        #undef deferredTimers
+        void deferredTimers(void);
 
     #endif
 
