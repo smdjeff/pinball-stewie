@@ -28,7 +28,7 @@ void haltPico(void) {
 }
     
 int usleep(useconds_t usec) {
-    sleep_us( usec );
+    busy_wait_us( usec );
 }
 
 int gpioInitialise(void) { 
@@ -211,18 +211,21 @@ static i2c_inst_t* i2cHandle(unsigned id) {
 }
 
 int i2cWriteByteData(unsigned id, unsigned i2cReg, unsigned bVal) {
-    const uint8_t byte = bVal;
-    printf("i2c_write_blocking id:%d handle:%p addr:%x\n", id, i2cHandle(id), myAddr[id]);
-    int ret = i2c_write_blocking(	i2cHandle(id), myAddr[id], &byte, 1/*len*/, false/*nostop*/ );
-    if ( ret < sizeof(byte) ) {
+    uint8_t data[2];
+    int len = sizeof(data);
+    data[0] = i2cReg;
+    data[1] = bVal;
+    int ret = i2c_write_blocking(	i2cHandle(id), myAddr[id], data, len, false/*nostop*/ );
+    // printf("i2c_write_blocking ret:%d id:%d handle:%p addr:%x data:%02x %02x\n", ret, id, i2cHandle(id), myAddr[id], data[0],data[1]);
+    if ( ret < len ) {
         assert( ret != PICO_ERROR_GENERIC );
     }
     return ret; 
 }
 
 int i2cOpen(unsigned id, unsigned addr, unsigned i2cFlags) { 
-    const uint baud = 100e3;
-    //const uint baud = 400e3;
+    //const uint baud = 100e3;
+    const uint baud = 400e3;
     // const uint baud = 1700e3;
     int ret = i2c_init(	i2cHandle(id), baud );
     printf("i2c_init ret:%d id:%d handle:%p addr:%x\n", ret, id, i2cHandle(id), addr); // mux=0x20
@@ -246,7 +249,6 @@ int i2cOpen(unsigned id, unsigned addr, unsigned i2cFlags) {
     gpio_set_function( scl, GPIO_FUNC_I2C );
     gpio_pull_up( sda );
     gpio_pull_up( scl );
-    printf("i2copen:%d\n",id);
     return id; 
 }
 
