@@ -39,13 +39,11 @@ static void mcp23017_write_both(int reg, int value) {
 }
 
 void mcp23017Output(uint8_t value) {
-  unsigned reg_addr = MCP_REGISTER(GPIO, GPIOA);
-  i2cWriteByteData(i2c_handle, reg_addr, value);
+  mcp23017_write( GPIO, GPIOA, value );
 }
 
 void mcp23017Init(void) {
-  i2c_handle = i2cOpen( 1/*i2cBus*/, 0x20/*i2cAddr*/, 0/*i2cFlags*/ );
-  // have you enabled the i2c interface via raspi-config?
+  i2c_handle = i2cOpen( 0/*i2cBus*/, 0x20/*i2cAddr*/, 0/*i2cFlags*/ );
   assert( i2c_handle >= 0 );
   
   mcp23017_write_both(IOCON,0b00000000);	// MIRROR=0,ODR=0

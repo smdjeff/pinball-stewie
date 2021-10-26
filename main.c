@@ -46,7 +46,8 @@ int main(int argc, char *argv[]) {
     //// run
     signal(SIGINT, intHandler);
     while ( !killed ) {
-        usleep(100 *1000);
+        usleep(1);
+        deferredTimers();
         fflush(stdout);
     }
 

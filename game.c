@@ -77,7 +77,7 @@ void attractCallback(void) {
 void gameInit(void) {
     gameStop();
     soundPlay( sound_boot );
-    gpioSetTimerFunc( TIMER_ATTRACT, 100, attractCallback );
+    gpioSetTimerFunc( TIMER_ATTRACT, 80, attractCallback );
 }
 
 void gameStart(void) {
@@ -96,7 +96,7 @@ void gameStop(void) {
         gpioWrite( LAMP_PLAYFIELD, LAMP_OFF );
         soundStopAll();
         flippersEnable( false );
-        gpioSetTimerFunc( TIMER_ATTRACT, 100, attractCallback );
+        gpioSetTimerFunc( TIMER_ATTRACT, 80, attractCallback );
     }
 }
 
