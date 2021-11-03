@@ -210,17 +210,36 @@ static i2c_inst_t* i2cHandle(unsigned id) {
   return 0;
 }
 
+int i2cReadByteData(unsigned id, unsigned i2cReg) {
+    uint8_t data[2] = {0,};
+    int len = sizeof(data);
+    data[0] = i2cReg;
+    int ret = i2c_read_blocking( i2cHandle(id), myAddr[id], &data, len, false/*nostop*/ );
+    if ( ret < len ) {
+        assert( ret != PICO_ERROR_GENERIC );
+    }
+    return data[1]; 
+}
+
 int i2cWriteByteData(unsigned id, unsigned i2cReg, unsigned bVal) {
     uint8_t data[2];
     int len = sizeof(data);
     data[0] = i2cReg;
     data[1] = bVal;
-    int ret = i2c_write_blocking(	i2cHandle(id), myAddr[id], data, len, false/*nostop*/ );
+    int ret = i2c_write_blocking( i2cHandle(id), myAddr[id], data, len, false/*nostop*/ );
     // printf("i2c_write_blocking ret:%d id:%d handle:%p addr:%x data:%02x %02x\n", ret, id, i2cHandle(id), myAddr[id], data[0],data[1]);
     if ( ret < len ) {
         assert( ret != PICO_ERROR_GENERIC );
     }
-    return ret; 
+    return 0; 
+}
+
+int i2cWriteDevice(unsigned id, char *data, unsigned len) {
+    int ret = i2c_write_blocking( i2cHandle(id), myAddr[id], data, len, false/*nostop*/ );
+    if ( ret < len ) {
+        assert( ret != PICO_ERROR_GENERIC );
+    }
+    return 0; 
 }
 
 int i2cOpen(unsigned id, unsigned addr, unsigned i2cFlags) { 

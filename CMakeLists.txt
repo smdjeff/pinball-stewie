@@ -19,6 +19,7 @@ add_executable(${PROJECT_NAME}
     lamps.c
     sounds.c
     mcp23017.c
+    is31fl3731.c
     stewie-lamps.c
     switches.c
 )

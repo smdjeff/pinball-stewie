@@ -109,7 +109,9 @@
     int gpioPWM(unsigned user_gpio, unsigned dutycycle);
     int gpioSetPWMfrequency(unsigned gpio, unsigned frequency);
     int gpioGetPWMfrequency(unsigned gpio);
+    int i2cReadByteData(unsigned handle, unsigned i2cReg);
     int i2cWriteByteData(unsigned handle, unsigned i2cReg, unsigned bVal);
+    int i2cWriteDevice(unsigned handle, char *buf, unsigned count);
     int i2cOpen(unsigned i2cBus, unsigned i2cAddr, unsigned i2cFlags);
 
 #endif

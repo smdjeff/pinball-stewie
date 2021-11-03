@@ -83,8 +83,16 @@ int gpioGlitchFilter(unsigned user_gpio, unsigned steady) {
     return 0;
 }
 
+int i2cReadByteData(unsigned handle, unsigned i2cReg) {
+    return 0;
+}
+
 int i2cWriteByteData(unsigned handle, unsigned i2cReg, unsigned bVal) {
-    return 0; 
+    return 0;
+}
+
+int i2cWriteDevice(unsigned handle, char *buf, unsigned count) {
+    return 0;
 }
 
 int i2cOpen(unsigned i2cBus, unsigned i2cAddr, unsigned i2cFlags) { 
