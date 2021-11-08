@@ -83,19 +83,23 @@ int gpioGlitchFilter(unsigned user_gpio, unsigned steady) {
     return 0;
 }
 
-int i2cReadByteData(unsigned handle, unsigned i2cReg) {
-    return 0;
-}
-
-int i2cWriteByteData(unsigned handle, unsigned i2cReg, unsigned bVal) {
-    return 0;
+int i2cWriteByteData(unsigned id, unsigned i2cReg, unsigned bVal) {
+    char data[2];
+    data[0] = i2cReg;
+    data[1] = bVal;
+    return i2cWriteDevice( id, data, sizeof(data) );
 }
 
 int i2cWriteDevice(unsigned handle, char *buf, unsigned count) {
+    printf("i2c-write[%d] ", handle); for (int i=0;i<count;i++) { printf("%02x ",(uint8_t)buf[i]); } printf("\n");
+    sleep(1);
     return 0;
 }
 
 int i2cOpen(unsigned i2cBus, unsigned i2cAddr, unsigned i2cFlags) { 
-    return 0; 
+    printf("i2c-open[%d,%d,%d]\n", i2cBus, i2cAddr, i2cFlags);
+    sleep(1);
+    int handle = rand();
+    return handle; 
 }
 

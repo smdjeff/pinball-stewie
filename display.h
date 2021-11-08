@@ -6,8 +6,8 @@
 #include <stdbool.h>
 
 void displayInit(void);
-void displayDeInit(void);
 
+uint8_t displayChar(char ch, uint8_t x0, uint8_t y0);
 void displayText(char *text);
 void displayScore(int score);
 void displayBall(int ball);

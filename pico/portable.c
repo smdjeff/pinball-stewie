@@ -199,75 +199,64 @@ int gpioCfgClock(unsigned micros, unsigned peripheral, unsigned source) {
     return 0;
 }
 
-static uint8_t myAddr[2] = {0,};
+typedef struct {
+    i2c_inst_t *instance;
+    uint8_t address;
+    uint32_t baud;
+} handle_t;
 
-static i2c_inst_t* i2cHandle(unsigned id) {
-  switch ( id ) {
-    case 0: return( i2c0 );
-    case 1: return( i2c1 );
-    default: assert( false );
-  }
-  return 0;
-}
-
-int i2cReadByteData(unsigned id, unsigned i2cReg) {
-    uint8_t data[2] = {0,};
-    int len = sizeof(data);
-    data[0] = i2cReg;
-    int ret = i2c_read_blocking( i2cHandle(id), myAddr[id], &data, len, false/*nostop*/ );
-    if ( ret < len ) {
-        assert( ret != PICO_ERROR_GENERIC );
+int i2cWriteByteData(unsigned handle, unsigned i2cReg, unsigned bVal) {
+    if ( !handle ) {
+      return -1;
     }
-    return data[1]; 
-}
-
-int i2cWriteByteData(unsigned id, unsigned i2cReg, unsigned bVal) {
     uint8_t data[2];
-    int len = sizeof(data);
     data[0] = i2cReg;
     data[1] = bVal;
-    int ret = i2c_write_blocking( i2cHandle(id), myAddr[id], data, len, false/*nostop*/ );
-    // printf("i2c_write_blocking ret:%d id:%d handle:%p addr:%x data:%02x %02x\n", ret, id, i2cHandle(id), myAddr[id], data[0],data[1]);
-    if ( ret < len ) {
-        assert( ret != PICO_ERROR_GENERIC );
+    return i2cWriteDevice( handle, data, sizeof(data) );
+}
+
+int i2cWriteDevice(unsigned handle, char *data, unsigned len) {
+    if ( !handle || !data || !len ) {
+      return -1;
     }
+    handle_t *h = (handle_t*)handle;
+    i2c_write_blocking( h->instance, h->address, data, len, false/*nostop*/ );
     return 0; 
 }
 
-int i2cWriteDevice(unsigned id, char *data, unsigned len) {
-    int ret = i2c_write_blocking( i2cHandle(id), myAddr[id], data, len, false/*nostop*/ );
-    if ( ret < len ) {
-        assert( ret != PICO_ERROR_GENERIC );
-    }
-    return 0; 
-}
-
-int i2cOpen(unsigned id, unsigned addr, unsigned i2cFlags) { 
-    //const uint baud = 100e3;
-    const uint baud = 400e3;
-    // const uint baud = 1700e3;
-    int ret = i2c_init(	i2cHandle(id), baud );
-    printf("i2c_init ret:%d id:%d handle:%p addr:%x\n", ret, id, i2cHandle(id), addr); // mux=0x20
-    assert( ret > baud * 0.99 && ret < baud * 1.01 );
-    myAddr[ id ] = addr;
-    
+int i2cOpen(unsigned bus, unsigned address, unsigned flags) { 
+    static handle_t handles[4] = {0,};
+    static int ix = 0;
+    handle_t *h = &handles[ ix ];
+    i2c_inst_t *instance;
     uint8_t sda;
     uint8_t scl;
-    switch ( id ) { 
-      case 0:
-        sda = MCP23017_SDA;   // i2c0_sda
-        scl = MCP23017_SCL;   // i2c0_scl
+    switch ( bus ) {
+      case 0: 
+        instance = i2c0; 
+        sda = MCP23017_SDA;
+        scl = MCP23017_SCL;
         break;
-      case 1:
-        sda = DISPLAY_SDA;   // i2c1_sda
-        scl = DISPLAY_SCL;   // i2c1_scl
+      case 1: 
+        instance = i2c1; 
+        sda = DISPLAY_SDA;
+        scl = DISPLAY_SCL;
         break;
-      default: assert( false );
+      default: 
+        return -1;
     }
+    ix++;
+    
+    h->instance = instance;
+    h->address = address;
+    h->baud = 400e3;
+    i2c_init(	h->instance, h->baud );
+
     gpio_set_function( sda, GPIO_FUNC_I2C );
     gpio_set_function( scl, GPIO_FUNC_I2C );
     gpio_pull_up( sda );
     gpio_pull_up( scl );
-    return id; 
+    printf("i2cOpen handle:%p\n",(int)h);
+    return (int)h; 
 }
 

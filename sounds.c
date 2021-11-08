@@ -12,7 +12,10 @@
 
 #include "sounds.h"
 
-void soundInit(void) { }
+void soundInit(void) {
+  printf("soundInit()\n");
+}
+
 void soundEnableMusic(bool enable) { }
 void soundPlay(sound_t sound) { }
 void soundStopAll(void) { }

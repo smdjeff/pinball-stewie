@@ -43,8 +43,9 @@ void mcp23017Output(uint8_t value) {
 }
 
 void mcp23017Init(void) {
+  printf("mcp23017Init\n");
   i2c_handle = i2cOpen( 0/*i2cBus*/, 0x20/*i2cAddr*/, 0/*i2cFlags*/ );
-  assert( i2c_handle >= 0 );
+  assert( i2c_handle );
   
   mcp23017_write_both(IOCON,0b00000000);	// MIRROR=0,ODR=0
   mcp23017_write_both(GPINTEN,0x00);	    // no ints
